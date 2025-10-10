@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import "tui-image-editor/dist/tui-image-editor.css";
 import "../css/ImageEditor.css"; // Make sure to import your CSS
-import CustomHeaderButtons from "./CustomHeaderButtons"; // Import the new component
 
 export default function ImageEditor() {
   const editorRef = useRef<HTMLDivElement>(null);
@@ -75,11 +74,6 @@ export default function ImageEditor() {
 
       {/* --- RENDER THE CUSTOM BUTTONS INTO THE HEADER USING A PORTAL --- */}
       {/* This will only render after headerEl is found and set in state */}
-      {headerEl &&
-        createPortal(
-          <CustomHeaderButtons editorInstance={instanceRef.current} />,
-          headerEl
-        )}
     </div>
   );
 }

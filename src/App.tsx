@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import ImageEditor from "./components/ImageEditor";
 import "./app.css";
 import BatchProcessor from "./components/BatchProcessor";
+import StyleTransferRei from "./components/StyleTransferRei";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/editor" element={<ImageEditor />} />
         <Route path="/batch" element={<BatchProcessor />} />
+        <Route path="/art" element={<StyleTransferRei />} />
       </Routes>
     </BrowserRouter>
   );
