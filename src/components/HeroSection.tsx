@@ -1,6 +1,52 @@
-import { Sparkles, ChevronRight, Zap, Play, Star, Users, Download, Shield } from "lucide-react";
+import { Sparkles, ChevronRight, Zap, Users, Download, Shield, Eye, Crop, SlidersHorizontal, Wand2, Upload, Check } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function HeroSection() {
+  // Feature Tour State
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Split Screen State (for future AI feature)
+  const [showAfter, setShowAfter] = useState(false);
+
+  const featureTourSteps = [
+    { 
+      area: { top: '5%', left: '0%', width: '19%', height: '95%' },
+      title: "Layers Panel",
+      desc: "Organize your work with layers and control opacity & blend modes",
+      icon: <Crop className="w-5 h-5" />
+    },
+    { 
+      area: { top: '0%', left: '0%', width: '100%', height: '6%' },
+      title: "Top Toolbar",
+      desc: "Quick access to essential tools, zoom controls, and export options",
+      icon: <SlidersHorizontal className="w-5 h-5" />
+    },
+    { 
+      area: { top: '5%', left: '81.5%', width: '18.5%', height: '95%' },
+      title: "Tools Panel",
+      desc: "Advanced editing features including crop, transform, adjust, and AI enhance",
+      icon: <Wand2 className="w-5 h-5" />
+    },
+    { 
+      area: { top: '6%', left: '19%', width: '62.5%', height: '94%' },
+      title: "Canvas Workspace",
+      desc: "Your creative canvas with real-time preview and non-destructive editing",
+      icon: <Eye className="w-5 h-5" />
+    },
+  ];
+
+  // Auto-advance feature tour - smooth and quick
+  useEffect(() => {
+    if (isPaused) return;
+    
+    const interval = setInterval(() => {
+      setCurrentStep((prev) => (prev + 1) % featureTourSteps.length);
+    }, 2500); // 2.5 seconds per step
+    
+    return () => clearInterval(interval);
+  }, [isPaused, featureTourSteps.length]);
+
   return (
     <>
       <section
@@ -24,7 +70,7 @@ export default function HeroSection() {
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         </div>
 
-        <div className="max-w-5xl mx-auto space-y-8 relative z-10">
+        <div className="max-w-6xl mx-auto space-y-8 relative z-10">
           {/* Enhanced Badge */}
           <div className="inline-flex items-center gap-3 bg-gradient-to-r from-cyan-50 via-blue-50 to-purple-50 text-cyan-700 px-6 py-3 rounded-full text-sm font-semibold border border-cyan-200/50 hover:shadow-xl hover:shadow-cyan-200/50 transition-all hover:scale-105 cursor-pointer animate-fade-in backdrop-blur-sm">
             <div className="flex items-center gap-2">
@@ -75,15 +121,6 @@ export default function HeroSection() {
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </a>
-            
-            <a
-              href="#features"
-              className="group bg-white/80 backdrop-blur-sm text-gray-700 px-10 py-5 rounded-2xl font-semibold text-lg transition-all border-2 border-gray-200/50 hover:border-cyan-400 hover:shadow-xl hover:shadow-cyan-100/50 hover:-translate-y-1 flex items-center gap-3"
-            >
-              <Play className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              Watch Demo
-              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </a>
           </div>
 
           {/* Enhanced Trust Indicators */}
@@ -106,45 +143,202 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Enhanced Hero Visual / Screenshot Preview */}
-          <div className="pt-16 relative group animate-fade-in-up animation-delay-800">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200/50 bg-gradient-to-br from-white via-gray-50 to-cyan-50/30 p-12 transition-all duration-500 group-hover:shadow-3xl group-hover:scale-[1.02] backdrop-blur-sm">
-              <div className="aspect-[16/10] bg-gradient-to-br from-cyan-100 via-blue-50 to-purple-100 rounded-2xl flex items-center justify-center relative overflow-hidden max-w-6xl mx-auto border border-gray-200/30">
-                <div className="absolute inset-0 bg-gradient-to-tr from-cyan-400/20 to-purple-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
-                {/* Enhanced Mock Editor Preview */}
-                <div className="relative z-10 text-center space-y-6">
-                  <div className="flex justify-center items-center gap-6">
-                    <div className="w-20 h-20 bg-white rounded-2xl shadow-xl flex items-center justify-center group-hover:scale-110 transition-transform border border-cyan-200/50">
-                      <Sparkles className="w-10 h-10 text-cyan-500" />
-                    </div>
-                    <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform border border-blue-200/50">
-                      <Star className="w-8 h-8 text-blue-500" />
-                    </div>
-                    <div className="w-20 h-20 bg-white rounded-2xl shadow-xl flex items-center justify-center group-hover:scale-110 transition-transform border border-purple-200/50">
-                      <Zap className="w-10 h-10 text-purple-500" />
-                    </div>
+          {/* INTERACTIVE PREVIEW SECTION */}
+          <div className="pt-16 relative animate-fade-in-up animation-delay-800">
+            {/* Preview Mode Selector */}
+            <div className="flex justify-center gap-3 mb-6">
+              <button
+                onClick={() => setIsPaused(false)}
+                className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+                  !isPaused 
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                }`}
+              >
+                <Eye className="w-5 h-5" />
+                Feature Tour
+              </button>
+              <button
+                onClick={() => setIsPaused(true)}
+                className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+                  isPaused 
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                }`}
+              >
+                <Wand2 className="w-5 h-5" />
+                AI Preview
+              </button>
+            </div>
+
+            {/* FEATURE TOUR MODE */}
+            {!isPaused && (
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200/50 bg-white p-6">
+                <div className="relative">
+                  {/* Editor Screenshot */}
+                  <img
+                    src="/images/preview-editor.png"
+                    alt="Clearity Editor Interface"
+                    className="w-full h-auto rounded-xl"
+                  />
+                  
+                   {/* Dark overlay with smooth cutout animation */}
+                   <div 
+                     className="absolute inset-0 pointer-events-none z-20 rounded-xl"
+                     style={{
+                       backgroundColor: 'rgba(0, 0, 0, 0.67)',
+                       clipPath: `polygon(
+                         0 0, 
+                         0 100%, 
+                         ${featureTourSteps[currentStep].area.left} 100%, 
+                         ${featureTourSteps[currentStep].area.left} ${featureTourSteps[currentStep].area.top},
+                         calc(${featureTourSteps[currentStep].area.left} + ${featureTourSteps[currentStep].area.width}) ${featureTourSteps[currentStep].area.top},
+                         calc(${featureTourSteps[currentStep].area.left} + ${featureTourSteps[currentStep].area.width}) calc(${featureTourSteps[currentStep].area.top} + ${featureTourSteps[currentStep].area.height}),
+                         ${featureTourSteps[currentStep].area.left} calc(${featureTourSteps[currentStep].area.top} + ${featureTourSteps[currentStep].area.height}),
+                         ${featureTourSteps[currentStep].area.left} 100%, 
+                         100% 100%, 
+                         100% 0
+                       )`,
+                       transition: 'clip-path 0.9s cubic-bezier(0.4, 0, 0.2, 1)'
+                     }}
+                  />
+                  
+                  {/* Highlighted Border Box - synchronized with overlay */}
+                  <div 
+                    className="absolute border-4 border-cyan-400 rounded-xl shadow-2xl shadow-cyan-400/60 pointer-events-none z-30 animate-pulse-border"
+                    style={{
+                      top: featureTourSteps[currentStep].area.top,
+                      left: featureTourSteps[currentStep].area.left,
+                      width: featureTourSteps[currentStep].area.width,
+                      height: featureTourSteps[currentStep].area.height,
+                      transition: 'all 0.9s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                  >
+                    {/* Corner accents - larger and more visible */}
+                    <div className="absolute -top-1.5 -left-1.5 w-6 h-6 border-t-4 border-l-4 border-cyan-400 rounded-tl-xl"></div>
+                    <div className="absolute -top-1.5 -right-1.5 w-6 h-6 border-t-4 border-r-4 border-cyan-400 rounded-tr-xl"></div>
+                    <div className="absolute -bottom-1.5 -left-1.5 w-6 h-6 border-b-4 border-l-4 border-cyan-400 rounded-bl-xl"></div>
+                    <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 border-b-4 border-r-4 border-cyan-400 rounded-br-xl"></div>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-gray-700 font-semibold text-lg">Interactive Editor Preview</p>
-                    <p className="text-gray-500 text-sm">Experience the power of AI-driven image editing</p>
-                  </div>
-                  <div className="flex gap-3 justify-center">
-                    <div className="w-16 h-3 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-full shadow-lg"></div>
-                    <div className="w-16 h-3 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full shadow-lg"></div>
-                    <div className="w-16 h-3 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full shadow-lg"></div>
+
+                  {/* Feature Description Card - Bottom Center Inside Image */}
+                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl px-6 py-4 max-w-lg mx-4 animate-slide-up z-40">
+                    <div className="text-center space-y-3">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <span className="text-xs font-bold text-cyan-500 bg-cyan-50 px-3 py-1 rounded-full">
+                          Step {currentStep + 1}/{featureTourSteps.length}
+                        </span>
+                      </div>
+                      <h3 className="font-bold text-lg text-gray-900">
+                        {featureTourSteps[currentStep].title}
+                      </h3>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        {featureTourSteps[currentStep].desc}
+                      </p>
+                    </div>
+
+                    {/* Progress Dots */}
+                    <div className="flex justify-center gap-2 mt-4 pt-4 border-t border-gray-100">
+                      {featureTourSteps.map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setCurrentStep(idx)}
+                          className={`h-2 rounded-full transition-all ${
+                            idx === currentStep 
+                              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 w-8' 
+                              : 'bg-gray-300 w-2 hover:bg-gray-400'
+                          }`}
+                          aria-label={`Go to step ${idx + 1}`}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            {/* Enhanced floating accent elements */}
-            <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full opacity-20 blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
-            <div className="absolute -bottom-6 -left-6 w-28 h-28 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-20 blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
-            <div className="absolute top-1/2 -left-8 w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-15 blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
+            )}
+
+            {/* AI SPLIT SCREEN MODE (Future Feature) */}
+            {isPaused && (
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200/50 bg-white p-6">
+                <div className="relative aspect-video rounded-xl overflow-hidden">
+                  {/* Toggle Controls */}
+                  <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex gap-2 bg-white/95 backdrop-blur-sm p-1.5 rounded-full shadow-xl border border-gray-200">
+                    <button
+                      onClick={() => setShowAfter(false)}
+                      className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
+                        !showAfter 
+                          ? 'bg-gray-900 text-white shadow-lg' 
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      }`}
+                    >
+                      Original
+                    </button>
+                    <button
+                      onClick={() => setShowAfter(true)}
+                      className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
+                        showAfter 
+                          ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      }`}
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      AI Enhanced
+                    </button>
+                  </div>
+
+                  {/* Before Image */}
+                  <div className={`absolute inset-0 transition-opacity duration-700 ${
+                    showAfter ? 'opacity-0' : 'opacity-100'
+                  }`}>
+                    <img
+                      src="/images/preview-editor.png"
+                      alt="Original Editor"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-6 left-6 bg-black/70 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm">
+                      Standard Editing
+                    </div>
+                  </div>
+
+                  {/* After Image */}
+                  <div className={`absolute inset-0 transition-opacity duration-700 ${
+                    showAfter ? 'opacity-100' : 'opacity-0'
+                  }`}>
+                    <img
+                      src="/images/preview-editor-ai.png"
+                      alt="AI Enhanced Editor"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-6 right-6 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg animate-bounce-slow">
+                      <Sparkles className="w-4 h-4" />
+                      AI Enhanced
+                    </div>
+                  </div>
+
+                  {/* Enhancement Badge */}
+                  {showAfter && (
+                    <div className="absolute top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 animate-fade-in shadow-lg">
+                      <Check className="w-4 h-4" />
+                      Auto-Enhanced
+                    </div>
+                  )}
+                </div>
+
+                {/* Coming Soon Badge for AI */}
+                <div className="mt-6 flex justify-center">
+                  <div className="inline-flex items-center gap-2 bg-purple-50 border border-purple-200 text-purple-700 px-6 py-3 rounded-full text-sm font-semibold">
+                    <Wand2 className="w-4 h-4" />
+                    <span>AI Features Coming Soon</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Floating accent elements */}
+            <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full opacity-20 blur-3xl group-hover:scale-150 transition-transform duration-700 pointer-events-none"></div>
+            <div className="absolute -bottom-6 -left-6 w-28 h-28 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-20 blur-3xl group-hover:scale-150 transition-transform duration-700 pointer-events-none"></div>
           </div>
         </div>
-
       </section>
 
       {/* Font Import */}
@@ -214,6 +408,11 @@ export default function HeroSection() {
           opacity: 0;
         }
 
+        .animation-delay-1000 {
+          animation-delay: 1s;
+          opacity: 0;
+        }
+
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
@@ -222,7 +421,6 @@ export default function HeroSection() {
         .animate-fade-in {
           animation: fadeIn 0.6s ease-out;
         }
-
 
         @keyframes float {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -241,43 +439,60 @@ export default function HeroSection() {
           animation-delay: 3s;
         }
 
-        @keyframes particleFloat {
-          0%, 100% { 
-            opacity: 0;
-            transform: translateY(0px) scale(0);
-          }
-          50% { 
-            opacity: 1;
-            transform: translateY(-30px) scale(1);
-          }
-        }
-
-        .animate-particle-float {
-          animation: particleFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes cardAppear {
+        @keyframes slideDown {
           from {
             opacity: 0;
-            transform: translateY(30px) scale(0.9);
+            transform: translate(-50%, -20px);
           }
           to {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translate(-50%, 0);
           }
         }
 
-        .animate-card-appear {
-          animation: cardAppear 0.6s ease-out forwards;
+        .animate-slide-down {
+          animation: slideDown 0.5s ease-out;
         }
 
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translate(-50%, 20px);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
         }
 
-        .animate-shimmer {
-          animation: shimmer 2s ease-in-out infinite;
+        .animate-slide-up {
+          animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes pulseBorder {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5), 0 0 40px rgba(6, 182, 212, 0.3);
+          }
+          50% {
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.7), 0 0 60px rgba(6, 182, 212, 0.4);
+          }
+        }
+
+        .animate-pulse-border {
+          animation: pulseBorder 2s ease-in-out infinite;
+        }
+
+        @keyframes bounceSlow {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-5px);
+          }
+        }
+
+        .animate-bounce-slow {
+          animation: bounceSlow 2s ease-in-out infinite;
         }
 
         .bg-grid-pattern {

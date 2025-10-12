@@ -564,6 +564,11 @@ export default function ImageEditor() {
     
     // --- Import Modal State ---
     const [showImportModal, setShowImportModal] = useState(false);
+    
+    // --- Drag and Drop States ---
+    const [draggedLayerId, setDraggedLayerId] = useState<string | null>(null);
+    const [isDraggingText, setIsDraggingText] = useState(false);
+    const [textPosition, setTextPosition] = useState<{x: number, y: number} | null>(null);
 
     // --- Layer States ---
     const [layers, setLayers] = useState<Layer[]>([]);
@@ -609,6 +614,8 @@ export default function ImageEditor() {
     // New states for advanced features
     const [gamma, setGamma] = useState(1);
     const [globalThreshold, setGlobalThreshold] = useState(128);
+    const [adaptiveWindowSize, setAdaptiveWindowSize] = useState(15);
+    const [adaptiveC, setAdaptiveC] = useState(10);
     const [activeShape, setActiveShape] = useState<ShapeType>('rectangle');
     const [shapeFill, setShapeFill] = useState(true);
     const [shapeColor, setShapeColor] = useState('#000000');
@@ -721,7 +728,17 @@ export default function ImageEditor() {
             }
         }
 
-    }, [layers, activeLayerId, brightness, contrast, saturation, hue, rotation, scale, perspectiveX, perspectiveY]);
+        // Draw text preview if dragging
+        if (isDraggingText && textPosition && textInput) {
+            ctx.save();
+            ctx.font = `${textSize}px Arial`;
+            ctx.fillStyle = textColor;
+            ctx.globalAlpha = 0.7;
+            ctx.fillText(textInput, textPosition.x, textPosition.y);
+            ctx.restore();
+        }
+
+    }, [layers, activeLayerId, brightness, contrast, saturation, hue, rotation, scale, perspectiveX, perspectiveY, isDraggingText, textPosition, textInput, textSize, textColor]);
     
     const calculateHistogram = useCallback((canvas: HTMLCanvasElement) => {
         const ctx = canvas.getContext('2d');
@@ -754,9 +771,9 @@ export default function ImageEditor() {
                         
                         canvasRef.current!.width = maxWidth;
                         canvasRef.current!.height = maxHeight;
-                        drawCanvas().then(() => {
-                            if(canvasRef.current) calculateHistogram(canvasRef.current);
-                        });
+            drawCanvas().then(() => {
+                if(canvasRef.current) calculateHistogram(canvasRef.current);
+            });
                     };
                     img.src = layer.dataUrl;
                 }
@@ -932,7 +949,11 @@ export default function ImageEditor() {
                 const width = pos.x - shapeStart.x;
                 const height = pos.y - shapeStart.y;
                 if(activeShape === 'rectangle'){
-                    ctx.rect(shapeStart.x, shapeStart.y, width, height);
+                    // Make rectangle have consistent sizing - use the larger dimension for both width and height
+                    const size = Math.max(Math.abs(width), Math.abs(height));
+                    const signX = width >= 0 ? 1 : -1;
+                    const signY = height >= 0 ? 1 : -1;
+                    ctx.rect(shapeStart.x, shapeStart.y, size * signX, size * signY);
                 } else if (activeShape === 'circle') {
                     const radius = Math.sqrt(width * width + height * height);
                     ctx.arc(shapeStart.x, shapeStart.y, radius, 0, 2 * Math.PI);
@@ -952,6 +973,8 @@ export default function ImageEditor() {
                     ctx.stroke();
                 }
             }
+        } else if (isDraggingText && activeTool === 'Text') {
+            handleTextDrag(e);
         }
     };
 
@@ -975,6 +998,9 @@ export default function ImageEditor() {
         if(isCropping) {
             setCropStart(null);
         }
+        if(isDraggingText) {
+            handleTextDrop();
+        }
     };
     
     const handleCanvasClick = (e: MouseEvent<HTMLCanvasElement>) => {
@@ -987,13 +1013,29 @@ export default function ImageEditor() {
     
     const handleApplyText = (e: MouseEvent<HTMLCanvasElement>) => {
         const pos = getCanvasMousePos(e);
+        setTextPosition(pos);
+        setIsDraggingText(true);
+    };
+
+    const handleTextDrag = (e: MouseEvent<HTMLCanvasElement>) => {
+        if (isDraggingText && textPosition) {
+            const newPos = getCanvasMousePos(e);
+            setTextPosition(newPos);
+        }
+    };
+
+    const handleTextDrop = () => {
+        if (isDraggingText && textPosition && textInput) {
         applyToActiveLayer((ctx, img) => {
             if (img) ctx.drawImage(img, 0, 0);
             ctx.font = `${textSize}px Arial`;
             ctx.fillStyle = textColor;
-            ctx.fillText(textInput, pos.x, pos.y);
+                ctx.fillText(textInput, textPosition.x, textPosition.y);
         });
         setTextInput('');
+            setIsDraggingText(false);
+            setTextPosition(null);
+        }
     };
     
     const handleApplyFilter = (filter: string) => {
@@ -1229,9 +1271,8 @@ export default function ImageEditor() {
 
     const applyThreshold = (isAdaptive: boolean) => {
         if(isAdaptive) {
-            alert("Adaptive thresholding is a complex feature and is not fully implemented in this demo.");
-            return;
-        }
+            applyAdaptiveThreshold();
+        } else {
         applyToActiveLayer((ctx, img) => {
             if (!img) return;
             ctx.drawImage(img, 0, 0);
@@ -1242,6 +1283,63 @@ export default function ImageEditor() {
                 const value = luminance > globalThreshold ? 255 : 0;
                 data[i] = data[i+1] = data[i+2] = value;
             }
+                ctx.putImageData(imageData, 0, 0);
+            });
+        }
+    }
+
+    const applyAdaptiveThreshold = () => {
+        applyToActiveLayer((ctx, img) => {
+            if (!img) return;
+            ctx.drawImage(img, 0, 0);
+            const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+            const data = imageData.data;
+            const width = imageData.width;
+            const height = imageData.height;
+            
+            // Convert to grayscale first
+            const grayscale = new Uint8ClampedArray(width * height);
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                grayscale[i / 4] = 0.299 * r + 0.587 * g + 0.114 * b;
+            }
+            
+            // Adaptive threshold parameters
+            const windowSize = adaptiveWindowSize; // Local window size (should be odd)
+            const C = adaptiveC; // Constant subtracted from mean
+            const halfWindow = Math.floor(windowSize / 2);
+            
+            // Apply adaptive threshold
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    let sum = 0;
+                    let count = 0;
+                    
+                    // Calculate local mean in window
+                    for (let wy = -halfWindow; wy <= halfWindow; wy++) {
+                        for (let wx = -halfWindow; wx <= halfWindow; wx++) {
+                            const ny = y + wy;
+                            const nx = x + wx;
+                            
+                            if (ny >= 0 && ny < height && nx >= 0 && nx < width) {
+                                sum += grayscale[ny * width + nx];
+                                count++;
+                            }
+                        }
+                    }
+                    
+                    const localMean = sum / count;
+                    const currentPixel = grayscale[y * width + x];
+                    const threshold = localMean - C;
+                    
+                    const value = currentPixel > threshold ? 255 : 0;
+                    const index = (y * width + x) * 4;
+                    data[index] = data[index + 1] = data[index + 2] = value;
+                }
+            }
+            
             ctx.putImageData(imageData, 0, 0);
         });
     }
@@ -1285,7 +1383,78 @@ export default function ImageEditor() {
     }
     
     const handleFloodFill = (e: MouseEvent<HTMLCanvasElement>) => {
-        alert("Bucket Fill feature is complex and will be implemented in a future version.");
+        const pos = getCanvasMousePos(e);
+        applyToActiveLayer((ctx, img) => {
+            if (!img) return;
+            ctx.drawImage(img, 0, 0);
+            const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+            const data = imageData.data;
+            const width = imageData.width;
+            const height = imageData.height;
+            
+            // Get the target color at the clicked position
+            const x = Math.floor(pos.x);
+            const y = Math.floor(pos.y);
+            const index = (y * width + x) * 4;
+            
+            if (x < 0 || x >= width || y < 0 || y >= height) return;
+            
+            const targetR = data[index];
+            const targetG = data[index + 1];
+            const targetB = data[index + 2];
+            const targetA = data[index + 3];
+            
+            // Parse fill color
+            const fillColor = shapeColor;
+            const fillR = parseInt(fillColor.slice(1, 3), 16);
+            const fillG = parseInt(fillColor.slice(3, 5), 16);
+            const fillB = parseInt(fillColor.slice(5, 7), 16);
+            
+            // Check if already filled
+            if (targetR === fillR && targetG === fillG && targetB === fillB) return;
+            
+            // Flood fill using stack-based approach
+            const stack: [number, number][] = [[x, y]];
+            const visited = new Set<string>();
+            
+            while (stack.length > 0) {
+                const [currentX, currentY] = stack.pop()!;
+                const key = `${currentX},${currentY}`;
+                
+                if (visited.has(key)) continue;
+                if (currentX < 0 || currentX >= width || currentY < 0 || currentY >= height) continue;
+                
+                const currentIndex = (currentY * width + currentX) * 4;
+                const currentR = data[currentIndex];
+                const currentG = data[currentIndex + 1];
+                const currentB = data[currentIndex + 2];
+                const currentA = data[currentIndex + 3];
+                
+                // Check if pixel matches target color (with tolerance)
+                const tolerance = 10;
+                if (Math.abs(currentR - targetR) <= tolerance &&
+                    Math.abs(currentG - targetG) <= tolerance &&
+                    Math.abs(currentB - targetB) <= tolerance &&
+                    Math.abs(currentA - targetA) <= tolerance) {
+                    
+                    // Fill the pixel
+                    data[currentIndex] = fillR;
+                    data[currentIndex + 1] = fillG;
+                    data[currentIndex + 2] = fillB;
+                    data[currentIndex + 3] = 255;
+                    
+                    visited.add(key);
+                    
+                    // Add neighbors to stack
+                    stack.push([currentX + 1, currentY]);
+                    stack.push([currentX - 1, currentY]);
+                    stack.push([currentX, currentY + 1]);
+                    stack.push([currentX, currentY - 1]);
+                }
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+        });
     };
 
     const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 5));
@@ -1369,6 +1538,44 @@ export default function ImageEditor() {
         commitHistory(updatedLayers);
     };
 
+    // --- Layer Drag and Drop Functions ---
+    const handleLayerDragStart = (e: React.DragEvent, layerId: string) => {
+        setDraggedLayerId(layerId);
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
+    const handleLayerDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleLayerDrop = (e: React.DragEvent, targetLayerId: string) => {
+        e.preventDefault();
+        if (!draggedLayerId || draggedLayerId === targetLayerId) return;
+
+        const draggedLayer = layers.find(l => l.id === draggedLayerId);
+        const targetLayer = layers.find(l => l.id === targetLayerId);
+        
+        if (!draggedLayer || !targetLayer) return;
+
+        const updatedLayers = layers.map(layer => {
+            if (layer.id === draggedLayerId) {
+                return { ...layer, zIndex: targetLayer.zIndex };
+            } else if (layer.id === targetLayerId) {
+                return { ...layer, zIndex: draggedLayer.zIndex };
+            }
+            return layer;
+        });
+
+        setLayers(updatedLayers);
+        commitHistory(updatedLayers);
+        setDraggedLayerId(null);
+    };
+
+    const handleLayerDragEnd = () => {
+        setDraggedLayerId(null);
+    };
+
 
     const mainTools = [
         { name: 'Crop', icon: <CropIcon className="w-6 h-6" /> },
@@ -1382,7 +1589,7 @@ export default function ImageEditor() {
         { name: 'Draw', icon: <PenToolIcon className="w-6 h-6" /> },
         { name: 'Text', icon: <TextIcon className="w-6 h-6" /> },
         { name: 'Shapes', icon: <ShapesIcon className="w-6 h-6" />},
-        { name: 'Layers', icon: <LayersIcon className="w-6 h-6" />},
+        
     ];
     
     return (
@@ -1429,23 +1636,35 @@ export default function ImageEditor() {
             {/* Minimal Professional Header */}
             <header className="flex items-center justify-between h-12 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 z-30 flex-shrink-0">
                 <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
+                    {/* Logo - Made Smaller */}
+                    <div className="flex items-center space-x-1">
                         <img 
                             src="/images/logo-darktheme.png" 
+                            onClick={() => window.location.href = '/'}
                             alt="Clearity" 
-                            className="h-8 w-auto"
+                            className="h-6 w-auto cursor-pointer hover:opacity-80 transition"
                             onError={(e) => {
-                                // Fallback to gradient logo if image fails to load
                                 const target = e.target as HTMLImageElement;
                                 target.style.display = 'none';
                                 const fallback = target.nextElementSibling as HTMLElement;
                                 if (fallback) fallback.style.display = 'flex';
                             }}
                         />
-                        <div className="w-6 h-6 bg-gradient-to-r from-cyan-500 to-blue-500 rounded flex items-center justify-center" style={{display: 'none'}}>
-                            <span className="text-white font-bold text-xs">C</span>
+                        <div className="hidden text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                            Clearity
                         </div>
-                        <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Clearity</h1>
+                    </div>
+
+                    {/* Breadcrumb Navigation */}
+                    <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                        <a 
+                            href="/" 
+                            className="hover:text-cyan-500 dark:hover:text-cyan-400 transition-colors"
+                        >
+                            Home
+                        </a>
+                        <span className="text-gray-400 dark:text-gray-500">›</span>
+                        <span className="text-gray-900 dark:text-gray-100 font-medium">Editor</span>
                     </div>
                 </div>
                 
@@ -1483,9 +1702,7 @@ export default function ImageEditor() {
                             <ZoomInIcon className="w-3.5 h-3.5"/>
                         </button>
                     </div>
-
                     <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
-
                     {/* Undo/Redo */}
                     <button 
                         onClick={handleUndo} 
@@ -1550,17 +1767,17 @@ export default function ImageEditor() {
                                     </div>
                                 </div>
                                 {exportFormat === 'jpeg' && (
-                                     <div className="space-y-2">
-                                         <label className="text-xs text-gray-600 dark:text-gray-400">Quality: {exportQuality}%</label>
-                                         <input 
-                                             type="range" 
-                                             min="1" 
-                                             max="100" 
-                                             value={exportQuality} 
-                                             onChange={(e) => setExportQuality(Number(e.target.value))} 
-                                             className="w-full h-1 bg-gray-200 dark:bg-gray-600 rounded appearance-none cursor-pointer accent-cyan-500" 
-                                         />
-                                     </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-gray-600 dark:text-gray-400">Quality: {exportQuality}%</label>
+                                        <input 
+                                            type="range" 
+                                            min="1" 
+                                            max="100" 
+                                            value={exportQuality} 
+                                            onChange={(e) => setExportQuality(Number(e.target.value))} 
+                                            className="w-full h-1 bg-gray-200 dark:bg-gray-600 rounded appearance-none cursor-pointer accent-cyan-500" 
+                                        />
+                                    </div>
                                 )}
                                 <button 
                                     onClick={handleExport} 
@@ -1597,7 +1814,16 @@ export default function ImageEditor() {
                         </div>
                         <div className="space-y-2">
                             {[...layers].sort((a,b) => b.zIndex - a.zIndex).map(layer => (
-                                <div key={layer.id} onClick={() => setActiveLayerId(layer.id)} className={`p-3 rounded-lg flex flex-col space-y-2 cursor-pointer transition-colors ${activeLayerId === layer.id ? 'bg-cyan-100 dark:bg-cyan-900/50 border border-cyan-300 dark:border-cyan-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800/50 border border-transparent'}`}>
+                                <div 
+                                    key={layer.id} 
+                                    draggable
+                                    onDragStart={(e) => handleLayerDragStart(e, layer.id)}
+                                    onDragOver={handleLayerDragOver}
+                                    onDrop={(e) => handleLayerDrop(e, layer.id)}
+                                    onDragEnd={handleLayerDragEnd}
+                                    onClick={() => setActiveLayerId(layer.id)} 
+                                    className={`p-3 rounded-lg flex flex-col space-y-2 cursor-pointer transition-colors ${activeLayerId === layer.id ? 'bg-cyan-100 dark:bg-cyan-900/50 border border-cyan-300 dark:border-cyan-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800/50 border border-transparent'} ${draggedLayerId === layer.id ? 'opacity-50' : ''}`}
+                                >
                                     <div className="flex items-center justify-between">
                                         <input 
                                             type="text" 
@@ -1710,39 +1936,39 @@ export default function ImageEditor() {
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Select Tool</h3>
                             <div className="grid grid-cols-3 gap-2">
-                                {mainTools.map(tool => (
-                                    <button
-                                        key={tool.name}
-                                        onClick={() => handleToolClick(tool.name)}
-                                        disabled={layers.length === 0 && tool.name !== 'Adjust'}
+                        {mainTools.map(tool => (
+                            <button
+                                key={tool.name}
+                                onClick={() => handleToolClick(tool.name)}
+                                disabled={layers.length === 0 && tool.name !== 'Adjust'}
                                         className={`p-3 rounded-lg transition-all duration-200 tool-button flex flex-col items-center ${
-                                            activeTool === tool.name
-                                                ? 'bg-cyan-600 text-white shadow-lg'
-                                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                        title={tool.name}
-                                    >
-                                        {tool.icon}
+                                    activeTool === tool.name
+                                        ? 'bg-cyan-600 text-white shadow-lg'
+                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                title={tool.name}
+                            >
+                                {tool.icon}
                                         <span className="text-xs mt-1">{tool.name}</span>
-                                    </button>
-                                ))}
-                            </div>
+                            </button>
+                        ))}
+                    </div>
                         </div>
-                        
+
                         {/* Tool Properties */}
-                        <div className="p-4">
+                    <div className="p-4">
                             <Accordion title="Crop" icon={<CropIcon className="w-5 h-5" />} isOpen={openAccordion === 'Crop'} onToggle={() => handleAccordionToggle('Crop')}>
                                 <div className="space-y-4">
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">Click and drag on the image to select an area.</p>
-                                    <button 
-                                        onClick={handleApplyCrop} 
-                                        disabled={!cropRect || cropRect.w === 0 || cropRect.h === 0} 
-                                        className="w-full text-center p-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium transition-all duration-200 disabled:from-gray-300 disabled:to-gray-400 dark:disabled:from-gray-600 dark:disabled:to-gray-700 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/25"
-                                    >
-                                        Apply Crop
-                                    </button>
-                                </div>
-                            </Accordion>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Click and drag on the image to select an area.</p>
+                                <button 
+                                    onClick={handleApplyCrop} 
+                                    disabled={!cropRect || cropRect.w === 0 || cropRect.h === 0} 
+                                    className="w-full text-center p-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium transition-all duration-200 disabled:from-gray-300 disabled:to-gray-400 dark:disabled:from-gray-600 dark:disabled:to-gray-700 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/25"
+                                >
+                                    Apply Crop
+                                </button>
+                            </div>
+                        </Accordion>
                         <Accordion title="Transform" icon={<ResizeIcon className="w-5 h-5" />} isOpen={openAccordion === 'Transform'} onToggle={() => handleAccordionToggle('Transform')}>
                             <div className="p-4 space-y-4">
                                 <div className="grid grid-cols-2 gap-2">
@@ -1821,9 +2047,13 @@ export default function ImageEditor() {
                                 <button onClick={applyGammaCorrection} className="w-full text-center p-2 rounded-md bg-teal-600 text-white hover:bg-teal-700 text-sm">Apply Gamma</button>
                                 <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
                                     <Slider icon={<ContrastIcon className="w-5 h-5" />} label="Global Threshold" value={globalThreshold} onChange={(e) => setGlobalThreshold(Number(e.target.value))} min={0} max={255} />
-                                    <div className='grid grid-cols-2 gap-2'>
-                                        <button onClick={() => applyThreshold(false)} className="w-full text-center p-2 rounded-md bg-teal-600 text-white hover:bg-teal-700 text-sm">Apply Global</button>
-                                        <button onClick={() => applyThreshold(true)} className="w-full text-center p-2 rounded-md bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-sm">Apply Adaptive</button>
+                                    <button onClick={() => applyThreshold(false)} className="w-full text-center p-2 rounded-md bg-teal-600 text-white hover:bg-teal-700 text-sm">Apply Global Threshold</button>
+                                    
+                                    <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Adaptive Threshold</h4>
+                                        <Slider icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>} label="Window Size" value={adaptiveWindowSize} onChange={(e) => setAdaptiveWindowSize(Number(e.target.value))} min={3} max={51} step={2} />
+                                        <Slider icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>} label="C Value" value={adaptiveC} onChange={(e) => setAdaptiveC(Number(e.target.value))} min={0} max={50} />
+                                        <button onClick={() => applyThreshold(true)} className="w-full text-center p-2 rounded-md bg-cyan-600 text-white hover:bg-cyan-700 text-sm">Apply Adaptive Threshold</button>
                                     </div>
                                 </div>
                             </div>
@@ -1890,8 +2120,8 @@ export default function ImageEditor() {
                                       <input type="range" min="1" max="100" value={drawSize} onChange={(e) => setDrawSize(Number(e.target.value))} className="w-full h-2 bg-gray-300 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-teal-500" />
                                   </div>
                                    <p className="text-xs text-gray-500 dark:text-gray-400">{activeShape === 'fill' ? 'Click on an area to fill with color.' : 'Click and drag on the image to draw.'}</p>
-                              </div>
-                         </Accordion>
+                           </div>
+                        </Accordion>
                         </div>
                     </div>
                 </aside>
@@ -1905,9 +2135,9 @@ export default function ImageEditor() {
                         <div className="text-center">
                             <div className="w-20 h-20 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900 dark:to-blue-900 rounded-2xl flex items-center justify-center mx-auto mb-6">
                                 <svg className="w-10 h-10 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
                             <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">Import Image</h3>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Choose an image file to start editing</p>
                             
@@ -1929,7 +2159,7 @@ export default function ImageEditor() {
                                     Cancel
                                 </button>
                             </div>
-                        </div>
+                            </div>
                     </div>
                 </div>
             )}
