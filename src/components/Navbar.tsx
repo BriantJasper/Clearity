@@ -17,9 +17,15 @@ export default function Navbar() {
           <Link to="/editor" className="hover:text-indigo-600 transition">
             Editor
           </Link>
-          <a href="#about" className="hover:text-indigo-600 transition">
-            About
-          </a>
+          <Link to="/remove-bg" className="hover:text-indigo-600 transition">
+            RemoveBg
+          </Link>
+          <Link to="/super-resolution" className="hover:text-indigo-600 transition">
+            Super Resolution
+          </Link>
+          <Link to="/art" className="hover:text-indigo-600 transition">
+            Transfer Style
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
