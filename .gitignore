@@ -1,3 +1,7 @@
+# Environment files
+.env
+*.env
+
 # Logs
 logs
 *.log
@@ -22,3 +26,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+s r c / b a c k e n d / . e n v  
+ . e n v 
