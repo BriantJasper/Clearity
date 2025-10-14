@@ -10,6 +10,7 @@ import StyleTransferRei from "./components/StyleTransferRei";
 import RemoveBackground from "./components/RemoveBackground";
 import SuperResolution from "./components/SuperResolution";
 import ObjectRemoval from "./components/ObjectRemoval";
+import AIFeaturesPage from "./pages/AIFeaturesPage";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -49,6 +50,11 @@ function App() {
         <Route path="/editor" element={<Editor />} />
         <Route path="/about" element={<About />} />
         <Route path="/batch" element={<BatchProcessor />} />
+        
+        {/* Unified AI Features Page with tabs */}
+        <Route path="/ai" element={<AIFeaturesPage />} />
+        
+        {/* Legacy routes for backward compatibility */}
         <Route path="/art" element={<StyleTransferRei />} />
         <Route path="/remove-bg" element={<RemoveBackground />} />
         <Route path="/super-resolution" element={<SuperResolution />} />

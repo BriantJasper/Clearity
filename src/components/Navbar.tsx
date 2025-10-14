@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Sparkles, ChevronDown, Wand2, Scissors, Palette, Maximize2, Layers, Image as ImageIcon } from "lucide-react";
+import { Menu, X, Sparkles, ChevronDown, Wand2, Scissors, Palette, Maximize2 } from "lucide-react";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -8,33 +8,37 @@ export default function Navbar() {
 
   const aiFeatures = [
     {
+      key: "remove-background",
       icon: <Scissors className="w-5 h-5" />,
       title: "Remove Background",
       description: "AI-powered background removal",
-      path: "/ai/remove-background",
+      path: "/ai?tab=remove-background",
       color: "cyan",
       badge: "Popular"
     },
     {
+      key: "style-transfer",
       icon: <Palette className="w-5 h-5" />,
       title: "Style Transfer",
       description: "Transform images with artistic styles",
-      path: "/ai/style-transfer",
+      path: "/ai?tab=style-transfer",
       color: "purple",
       badge: "New"
     },
     {
+      key: "object-removal",
       icon: <Wand2 className="w-5 h-5" />,
       title: "Object Removal",
       description: "Remove unwanted objects seamlessly",
-      path: "/ai/object-removal",
+      path: "/ai?tab=object-removal",
       color: "blue"
     },
     {
+      key: "super-resolution",
       icon: <Maximize2 className="w-5 h-5" />,
       title: "Super Resolution",
       description: "Upscale images with AI enhancement",
-      path: "/ai/super-resolution",
+      path: "/ai?tab=super-resolution",
       color: "pink"
     }
   ];
@@ -146,9 +150,7 @@ export default function Navbar() {
               </div>
             </div>
             
-            <Link 
-              to="/about" 
-
+            
             <Link
               to="/about"
               className="relative text-gray-700 hover:text-cyan-400 transition-colors group"
@@ -169,24 +171,6 @@ export default function Navbar() {
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </Link>
           </div>
-          <Link to="/editor" className="hover:text-indigo-600 transition">
-            Editor
-          </Link>
-          <Link to="/remove-bg" className="hover:text-indigo-600 transition">
-            RemoveBg
-          </Link>
-          <Link
-            to="/super-resolution"
-            className="hover:text-indigo-600 transition"
-          >
-            Super Resolution
-          </Link>
-          <Link to="/art" className="hover:text-indigo-600 transition">
-            Transfer Style
-          </Link>
-          <Link to="/objectremoval" className="hover:text-indigo-600 transition">
-            Object Removal
-          </Link>
         </div>
         <div>
           {/* Mobile Menu Button */}
@@ -198,13 +182,12 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
-        <div
-          className={`md:hidden bg-white border-t overflow-hidden transition-all duration-300 ${
-            open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
-            open ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
-          }`}
-        >
+          {/* Mobile Menu */}
+          <div
+            className={`md:hidden bg-white border-t overflow-hidden transition-all duration-300 ${
+              open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
           <Link
             to="/"
             className="block px-6 py-3 hover:bg-cyan-50 hover:text-cyan-500 transition-all border-l-4 border-transparent hover:border-cyan-400"
@@ -257,8 +240,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          <Link 
-            to="/about" 
           <Link
             to="/editor"
             className="block px-6 py-3 hover:bg-cyan-50 hover:text-cyan-500 transition-all border-l-4 border-transparent hover:border-cyan-400"
