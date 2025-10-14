@@ -5,7 +5,7 @@ export default function LoadingScreen({ onLoadingComplete }: { onLoadingComplete
   const [status, setStatus] = useState('Initializing...');
 
   useEffect(() => {
-    let phaseTimers: NodeJS.Timeout[] = [];
+    const phaseTimers: NodeJS.Timeout[] = [];
 
     // Sequential phase transitions with logic-based statuses
     phaseTimers.push(
@@ -155,7 +155,7 @@ export default function LoadingScreen({ onLoadingComplete }: { onLoadingComplete
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes letterFloat {
           0%, 100% { transform: translateY(0) scale(1); }
           50% { transform: translateY(-8px) scale(1.02); }

@@ -5,6 +5,11 @@ import Editor from "./pages/Editor";
 import LoadingScreen from "./components/LoadingScreen";
 import { useState, useEffect } from "react";
 import "./app.css";
+import BatchProcessor from "./components/BatchProcessor";
+import StyleTransferRei from "./components/StyleTransferRei";
+import RemoveBackground from "./components/RemoveBackground";
+import SuperResolution from "./components/SuperResolution";
+import ObjectRemoval from "./components/ObjectRemoval";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +48,11 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/editor" element={<Editor />} />
         <Route path="/about" element={<About />} />
+        <Route path="/batch" element={<BatchProcessor />} />
+        <Route path="/art" element={<StyleTransferRei />} />
+        <Route path="/remove-bg" element={<RemoveBackground />} />
+        <Route path="/super-resolution" element={<SuperResolution />} />
+        <Route path="/objectremoval" element={<ObjectRemoval />} />
       </Routes>
     </BrowserRouter>
   );
