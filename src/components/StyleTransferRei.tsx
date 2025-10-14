@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as tf from "@tensorflow/tfjs";
-import * as magenta from "@magenta/image";
+import * as magenta from "@magenta/image"; 
 
 interface StylePreset {
   id: string;
@@ -28,7 +28,9 @@ export default function StyleTransferRei() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const stylePresets: StylePreset[] = [
-    { id: "bricks", name: "Bricks", src: "/styles/bricks.jpg" },
+    { id: "chinese-ink", name: "Chinese Ink", src: "/styles/chinese-ink.jpg" },
+    { id: "8bit", name: "8 Bit", src: "/styles/8bit.jpeg" },
+    { id: "bricks", name: "Bricks", src: "/styles/bricks.jpg" },  
     { id: "stripes", name: "Stripes", src: "/styles/stripes.jpg" },
     { id: "udnie", name: "Udnie", src: "/styles/udnie.jpg" },
     { id: "zigzag", name: "ZigZag", src: "/styles/zigzag.jpg" },
