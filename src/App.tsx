@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import ImageEditor from "./components/ImageEditor";
+import About from "./pages/About";
+import Editor from "./pages/Editor";
+import LoadingScreen from "./components/LoadingScreen";
+import { useState, useEffect } from "react";
 import "./app.css";
 import BatchProcessor from "./components/BatchProcessor";
 import StyleTransferRei from "./components/StyleTransferRei";
@@ -9,6 +12,36 @@ import SuperResolution from "./components/SuperResolution";
 import ObjectRemoval from "./components/ObjectRemoval";
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  // useEffect(() => {
+  //   // Optional: only show once per browser session
+  //   const seen = sessionStorage.getItem("hasSeenLoading");
+  //   if (seen === "true") {
+  //     setIsLoading(false);
+  //     return;
+  //   }
+
+  //   const timer = setTimeout(() => {
+  //     setIsLoading(false);
+  //     sessionStorage.setItem("hasSeenLoading", "true");
+  //   }, 3500);
+
+  //   return () => clearTimeout(timer);
+  // }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3500);
+  
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingScreen onLoadingComplete={() => setIsLoading(false)} />;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
