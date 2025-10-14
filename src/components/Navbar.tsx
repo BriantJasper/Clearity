@@ -56,8 +56,8 @@ export default function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8 font-medium">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="relative text-gray-700 hover:text-cyan-400 transition-colors group"
             >
               Home
@@ -148,12 +148,15 @@ export default function Navbar() {
             
             <Link 
               to="/about" 
+
+            <Link
+              to="/about"
               className="relative text-gray-700 hover:text-cyan-400 transition-colors group"
             >
               About
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-cyan-400 group-hover:w-full transition-all duration-300"></span>
             </Link>
-            
+
             {/* CTA Button */}
             <Link
               to="/editor"
@@ -166,7 +169,26 @@ export default function Navbar() {
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </Link>
           </div>
-
+          <Link to="/editor" className="hover:text-indigo-600 transition">
+            Editor
+          </Link>
+          <Link to="/remove-bg" className="hover:text-indigo-600 transition">
+            RemoveBg
+          </Link>
+          <Link
+            to="/super-resolution"
+            className="hover:text-indigo-600 transition"
+          >
+            Super Resolution
+          </Link>
+          <Link to="/art" className="hover:text-indigo-600 transition">
+            Transfer Style
+          </Link>
+          <Link to="/objectremoval" className="hover:text-indigo-600 transition">
+            Object Removal
+          </Link>
+        </div>
+        <div>
           {/* Mobile Menu Button */}
           <button
             onClick={() => setOpen(!open)}
@@ -177,9 +199,10 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu */}
-        <div 
+        <div
           className={`md:hidden bg-white border-t overflow-hidden transition-all duration-300 ${
             open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+            open ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
           }`}
         >
           <Link
@@ -236,6 +259,15 @@ export default function Navbar() {
 
           <Link 
             to="/about" 
+          <Link
+            to="/editor"
+            className="block px-6 py-3 hover:bg-cyan-50 hover:text-cyan-500 transition-all border-l-4 border-transparent hover:border-cyan-400"
+            onClick={() => setOpen(false)}
+          >
+            Editor
+          </Link>
+          <Link
+            to="/about"
             className="block px-6 py-3 hover:bg-cyan-50 hover:text-cyan-500 transition-all border-l-4 border-transparent hover:border-cyan-400"
             onClick={() => setOpen(false)}
           >
