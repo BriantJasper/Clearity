@@ -1,58 +1,66 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Upload, Eraser, Undo, Redo, Download, Trash2 } from "lucide-react";
-import * as tf from "@tensorflow/tfjs";
+
+interface HistoryState {
+  imageData: string;
+  maskData: string;
+}
 
 const ObjectRemoval = () => {
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState<string | null>(null);
   const [brushSize, setBrushSize] = useState(20);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const canvasRef = useRef(null);
-  const maskCanvasRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const [history, setHistory] = useState([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const maskCanvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [history, setHistory] = useState<HistoryState[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
-  useEffect(() => {
-    // Initialize TensorFlow.js
-    tf.ready();
-  }, []);
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
         const img = new Image();
         img.onload = () => {
-          // Wait for next render cycle to ensure refs are available
           requestAnimationFrame(() => {
             const canvas = canvasRef.current;
             const maskCanvas = maskCanvasRef.current;
 
-            if (!canvas || !maskCanvas) {
-              console.error("Canvas refs not available");
-              return;
-            }
+            if (!canvas || !maskCanvas) return;
 
             const ctx = canvas.getContext("2d");
             const maskCtx = maskCanvas.getContext("2d");
 
-            // Set canvas dimensions
-            canvas.width = img.width;
-            canvas.height = img.height;
-            maskCanvas.width = img.width;
-            maskCanvas.height = img.height;
+            if (!ctx || !maskCtx) return;
 
-            // Draw image
-            ctx.drawImage(img, 0, 0);
+            // Limit canvas size for better performance
+            const maxSize = 1024;
+            let width = img.width;
+            let height = img.height;
 
-            // Clear mask
+            if (width > maxSize || height > maxSize) {
+              if (width > height) {
+                height = (height / width) * maxSize;
+                width = maxSize;
+              } else {
+                width = (width / height) * maxSize;
+                height = maxSize;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            maskCanvas.width = width;
+            maskCanvas.height = height;
+
+            ctx.drawImage(img, 0, 0, width, height);
+
             maskCtx.fillStyle = "black";
             maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
 
-            // Save initial state to history
-            const initialHistory = [
+            const initialHistory: HistoryState[] = [
               {
                 imageData: canvas.toDataURL(),
                 maskData: maskCanvas.toDataURL(),
@@ -62,10 +70,10 @@ const ObjectRemoval = () => {
             setHistoryIndex(0);
           });
         };
-        img.src = event.target.result;
+        img.src = event.target?.result as string;
       };
       reader.readAsDataURL(file);
-      setImage(true); // Set image state to trigger render
+      setImage(URL.createObjectURL(file));
     }
   };
 
@@ -99,11 +107,14 @@ const ObjectRemoval = () => {
     }
   };
 
-  const restoreFromHistory = (index) => {
+  const restoreFromHistory = (index: number) => {
     const canvas = canvasRef.current;
     const maskCanvas = maskCanvasRef.current;
+    if (!canvas || !maskCanvas) return;
+
     const ctx = canvas.getContext("2d");
     const maskCtx = maskCanvas.getContext("2d");
+    if (!ctx || !maskCtx) return;
 
     const img = new Image();
     img.onload = () => {
@@ -118,7 +129,9 @@ const ObjectRemoval = () => {
     maskImg.src = history[index].maskData;
   };
 
-  const startDrawing = (e) => {
+  const startDrawing = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => {
     setIsDrawing(true);
     draw(e);
   };
@@ -130,30 +143,43 @@ const ObjectRemoval = () => {
     }
   };
 
-  const draw = (e) => {
+  const draw = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => {
     if (!isDrawing && e.type !== "mousedown" && e.type !== "touchstart") return;
 
     const canvas = canvasRef.current;
     const maskCanvas = maskCanvasRef.current;
+    if (!canvas || !maskCanvas) return;
+
     const rect = canvas.getBoundingClientRect();
 
-    let x, y;
+    let x: number, y: number;
     if (e.type.includes("touch")) {
-      x = (e.touches[0].clientX - rect.left) * (canvas.width / rect.width);
-      y = (e.touches[0].clientY - rect.top) * (canvas.height / rect.height);
+      const touchEvent = e as React.TouchEvent<HTMLCanvasElement>;
+      x =
+        (touchEvent.touches[0].clientX - rect.left) *
+        (canvas.width / rect.width);
+      y =
+        (touchEvent.touches[0].clientY - rect.top) *
+        (canvas.height / rect.height);
     } else {
-      x = (e.clientX - rect.left) * (canvas.width / rect.width);
-      y = (e.clientY - rect.top) * (canvas.height / rect.height);
+      const mouseEvent = e as React.MouseEvent<HTMLCanvasElement>;
+      x = (mouseEvent.clientX - rect.left) * (canvas.width / rect.width);
+      y = (mouseEvent.clientY - rect.top) * (canvas.height / rect.height);
     }
 
     const maskCtx = maskCanvas.getContext("2d");
+    if (!maskCtx) return;
+
     maskCtx.fillStyle = "white";
     maskCtx.beginPath();
     maskCtx.arc(x, y, brushSize, 0, Math.PI * 2);
     maskCtx.fill();
 
-    // Show visual feedback on main canvas
     const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
     ctx.globalAlpha = 0.5;
     ctx.fillStyle = "red";
     ctx.beginPath();
@@ -162,104 +188,121 @@ const ObjectRemoval = () => {
     ctx.globalAlpha = 1.0;
   };
 
+  const dataURLtoBlob = (dataURL: string): Blob => {
+    const arr = dataURL.split(",");
+    const mime = arr[0].match(/:(.*?);/)![1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  };
+
   const performInpainting = async () => {
-    if (!image) return;
+    if (!image) {
+      alert("Please upload an image first!");
+      return;
+    }
 
     setIsProcessing(true);
     const canvas = canvasRef.current;
     const maskCanvas = maskCanvasRef.current;
-    const ctx = canvas.getContext("2d");
+    if (!canvas || !maskCanvas) {
+      setIsProcessing(false);
+      return;
+    }
 
     try {
-      // Get image and mask data
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const maskCtx = maskCanvas.getContext("2d");
-      const maskData = maskCtx.getImageData(
-        0,
-        0,
-        maskCanvas.width,
-        maskCanvas.height
-      );
+      // Save the original image data without the red overlay
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-      // Convert to tensors
-      const imageTensor = tf.browser.fromPixels(imageData);
-      const maskTensor = tf.browser.fromPixels(maskData).mean(2).expandDims(2);
+      // Load original image to get clean version
+      const originalImg = new Image();
+      await new Promise<void>((resolve) => {
+        originalImg.onload = () => {
+          ctx.drawImage(originalImg, 0, 0);
+          resolve();
+        };
+        originalImg.src = history[0].imageData;
+      });
 
-      // Normalize
-      const normalizedMask = maskTensor.greater(0.5);
+      // Convert canvases to blobs
+      const imageBlob = dataURLtoBlob(canvas.toDataURL("image/png"));
+      const maskBlob = dataURLtoBlob(maskCanvas.toDataURL("image/png"));
 
-      // Simple inpainting using surrounding pixels
-      const result = await inpaintSimple(
-        imageTensor,
-        normalizedMask,
-        canvas.width,
-        canvas.height
-      );
+      // Create FormData
+      const formData = new FormData();
+      formData.append("image", imageBlob, "image.png");
+      formData.append("mask", maskBlob, "mask.png");
 
-      // Draw result back to canvas
-      await tf.browser.toPixels(result, canvas);
+      // Call your backend API
+      const response = await fetch("http://localhost:5000/api/remove-object", {
+        method: "POST",
+        body: formData,
+      });
 
-      // Clear mask
-      maskCtx.fillStyle = "black";
-      maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`API Error (${response.status}): ${error}`);
+      }
 
-      saveToHistory();
+      const resultBlob = await response.blob();
+      const resultUrl = URL.createObjectURL(resultBlob);
 
-      // Cleanup
-      imageTensor.dispose();
-      maskTensor.dispose();
-      normalizedMask.dispose();
-      result.dispose();
+      // Load result back to canvas
+      const resultImg = new Image();
+      resultImg.onload = () => {
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        ctx.drawImage(resultImg, 0, 0, canvas.width, canvas.height);
+
+        // Clear mask
+        const maskCtx = maskCanvas.getContext("2d");
+        if (maskCtx) {
+          maskCtx.fillStyle = "black";
+          maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+        }
+
+        saveToHistory();
+        URL.revokeObjectURL(resultUrl);
+      };
+      resultImg.src = resultUrl;
     } catch (error) {
       console.error("Inpainting error:", error);
-      alert("Error processing image. Please try again.");
+      alert(
+        `Error: ${
+          error instanceof Error ? error.message : "Failed to process image"
+        }. \n\nPlease make sure your backend server is running on port 5000.`
+      );
     }
 
     setIsProcessing(false);
   };
 
-  const inpaintSimple = async (imageTensor, maskTensor, width, height) => {
-    return tf.tidy(() => {
-      // Get the inverse mask (areas to keep)
-      const inverseMask = tf.logicalNot(maskTensor).cast("float32");
-
-      // Apply Gaussian blur to smooth boundaries
-      const blurred = imageTensor.conv2d(
-        tf
-          .tensor4d(
-            [
-              [1 / 16, 2 / 16, 1 / 16],
-              [2 / 16, 4 / 16, 2 / 16],
-              [1 / 16, 2 / 16, 1 / 16],
-            ],
-            [3, 3, 1, 1]
-          )
-          .tile([1, 1, 3, 1]),
-        1,
-        "same"
-      );
-
-      // Combine original and blurred based on mask
-      const result = imageTensor
-        .mul(inverseMask)
-        .add(blurred.mul(maskTensor.cast("float32")));
-
-      return result.clipByValue(0, 255).cast("int32");
-    });
-  };
-
   const clearMask = () => {
     const maskCanvas = maskCanvasRef.current;
     const canvas = canvasRef.current;
-    if (!maskCanvas || !image) return;
+    if (!maskCanvas || !canvas || !image) return;
 
     const maskCtx = maskCanvas.getContext("2d");
+    const ctx = canvas.getContext("2d");
+    if (!maskCtx || !ctx) return;
+
     maskCtx.fillStyle = "black";
     maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
 
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(image, 0, 0);
-    saveToHistory();
+    const img = new Image();
+    img.onload = () => {
+      if (canvas && ctx) {
+        ctx.drawImage(img, 0, 0);
+        saveToHistory();
+      }
+    };
+    img.src = image;
   };
 
   const downloadImage = () => {
@@ -267,9 +310,11 @@ const ObjectRemoval = () => {
     if (!canvas) return;
 
     const link = document.createElement("a");
-    link.download = "edited-image.png";
-    link.href = canvas.toDataURL();
+    link.download = `object-removed-${Date.now()}.png`;
+    link.href = canvas.toDataURL("image/png");
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -277,11 +322,11 @@ const ObjectRemoval = () => {
       <div className="max-w-6xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Object Removal Tool
+            AI Object Removal Tool
           </h1>
           <p className="text-gray-600 mb-6">
-            Upload an image, mark objects to remove, and let AI fill the gaps
-            seamlessly
+            Upload an image and paint over objects to remove them using Clipdrop
+            AI
           </p>
 
           {/* Controls */}
@@ -408,15 +453,20 @@ const ObjectRemoval = () => {
               <li>Upload an image using the "Upload Image" button</li>
               <li>Adjust the brush size using the slider</li>
               <li>
-                Draw over the objects you want to remove (they'll appear in red)
+                Paint over the objects you want to remove (they'll appear in
+                red)
               </li>
               <li>Use Undo/Redo to correct mistakes</li>
-              <li>
-                Click "Remove Objects" to process the image with AI-assisted
-                fill
-              </li>
+              <li>Click "Remove Objects" to process with Clipdrop AI</li>
               <li>Download your edited image when satisfied</li>
             </ol>
+            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
+              <p className="text-green-800 text-sm">
+                <strong>✨ AI-Powered:</strong> This tool uses Clipdrop's
+                Cleanup API which intelligently fills in removed areas with
+                realistic content based on the surrounding context.
+              </p>
+            </div>
           </div>
         </div>
       </div>

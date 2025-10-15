@@ -1,5 +1,5 @@
 import { Crop, RotateCw, FlipHorizontal2, SlidersHorizontal, Contrast, Sun, Wand2, Sparkles, ScanFace, Eraser, MoveUpRight, Layers, Paintbrush, Zap, Eye } from "lucide-react";
-import { Link } from "react-router-dom";
+
 export default function FeaturesSection() {
   return (
     <section id="features" className="relative pt-32 pb-24 bg-gradient-to-br from-gray-50 via-white to-cyan-50/30 overflow-hidden">
@@ -110,14 +110,11 @@ export default function FeaturesSection() {
 
         {/* Call to Action */}
         <div className="text-center">
-          <Link to={'/editor'} >
           <div className="inline-flex items-center gap-3 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-cyan-400/50 cursor-pointer animate-fade-in-up animation-delay-600">
             <Sparkles className="w-6 h-6" />
             Start Editing Now
             <MoveUpRight className="w-5 h-5" />
-            
           </div>
-          </Link> 
         </div>
       </div>
 
