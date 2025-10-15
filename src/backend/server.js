@@ -664,6 +664,143 @@ app.get("/api/video-status/:operationId", async (req, res) => {
   }
 });
 
+// ------------------------------
+// 🟦 Uncrop/Image Expansion Endpoint (Clipdrop)
+// ------------------------------
+app.post("/api/uncrop-image", upload.single("image"), async (req, res) => {
+  try {
+    console.log("🟢 /api/uncrop-image called (Clipdrop)");
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No image uploaded" });
+    }
+
+    if (!CLIPDROP_API_KEY) {
+      console.error("❌ CLIPDROP_API_KEY not found in .env");
+      return res
+        .status(500)
+        .json({ error: "Clipdrop API key not configured" });
+    }
+
+    const imagePath = req.file.path;
+
+    // Get extension parameters (defaults to 0)
+    const extendLeft = req.body.extend_left || "0";
+    const extendRight = req.body.extend_right || "0";
+    const extendUp = req.body.extend_up || "0";
+    const extendDown = req.body.extend_down || "0";
+
+    console.log(
+      `📐 Extensions: Left=${extendLeft}px, Right=${extendRight}px, Up=${extendUp}px, Down=${extendDown}px`
+    );
+
+    const formData = new FormData();
+    formData.append("image_file", fs.createReadStream(imagePath));
+    formData.append("extend_left", extendLeft);
+    formData.append("extend_right", extendRight);
+    formData.append("extend_up", extendUp);
+    formData.append("extend_down", extendDown);
+
+    console.log("✅ Sending to Clipdrop Uncrop API...");
+
+    const response = await fetch("https://clipdrop-api.co/uncrop/v1", {
+      method: "POST",
+      headers: {
+        "x-api-key": CLIPDROP_API_KEY,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Clipdrop Uncrop Error:", errorText);
+      fs.unlinkSync(imagePath);
+      return res.status(response.status).send(errorText);
+    }
+
+    const buffer = await response.arrayBuffer();
+
+    // Clean up uploaded file
+    fs.unlinkSync(imagePath);
+
+    res.set("Content-Type", "image/jpeg");
+    res.send(Buffer.from(buffer));
+
+    console.log("✅ Image uncrop complete!");
+  } catch (error) {
+    console.error("❌ Server Error:", error);
+
+    // Clean up file if it exists
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ------------------------------
+// 🟣 Remove Text Endpoint (Clipdrop)
+// ------------------------------
+app.post("/api/remove-text", upload.single("image"), async (req, res) => {
+  try {
+    console.log("🟢 /api/remove-text called (Clipdrop)");
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No image uploaded" });
+    }
+
+    if (!CLIPDROP_API_KEY) {
+      console.error("❌ CLIPDROP_API_KEY not found in .env");
+      return res
+        .status(500)
+        .json({ error: "Clipdrop API key not configured" });
+    }
+
+    const imagePath = req.file.path;
+
+    console.log("📝 Removing text from image...");
+
+    const formData = new FormData();
+    formData.append("image_file", fs.createReadStream(imagePath));
+
+    console.log("✅ Sending to Clipdrop Remove Text API...");
+
+    const response = await fetch("https://clipdrop-api.co/remove-text/v1", {
+      method: "POST",
+      headers: {
+        "x-api-key": CLIPDROP_API_KEY,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Clipdrop Remove Text Error:", errorText);
+      fs.unlinkSync(imagePath);
+      return res.status(response.status).send(errorText);
+    }
+
+    const buffer = await response.arrayBuffer();
+
+    // Clean up uploaded file
+    fs.unlinkSync(imagePath);
+
+    res.set("Content-Type", "image/png");
+    res.send(Buffer.from(buffer));
+
+    console.log("✅ Text removal complete!");
+  } catch (error) {
+    console.error("❌ Server Error:", error);
+
+    // Clean up file if it exists
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.listen(5000, () =>
   console.log(`✅ Backend running at http://localhost:5000`)

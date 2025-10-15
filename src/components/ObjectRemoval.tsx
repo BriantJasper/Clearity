@@ -1,5 +1,13 @@
 import React, { useState, useRef } from "react";
-import { Upload, Eraser, Undo, Redo, Download, Trash2 } from "lucide-react";
+import {
+  Upload,
+  Eraser,
+  Undo,
+  Redo,
+  Download,
+  Trash2,
+  Wand2,
+} from "lucide-react";
 
 interface HistoryState {
   imageData: string;
@@ -35,7 +43,6 @@ const ObjectRemoval = () => {
 
             if (!ctx || !maskCtx) return;
 
-            // Limit canvas size for better performance
             const maxSize = 1024;
             let width = img.width;
             let height = img.height;
@@ -215,11 +222,9 @@ const ObjectRemoval = () => {
     }
 
     try {
-      // Save the original image data without the red overlay
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      // Load original image to get clean version
       const originalImg = new Image();
       await new Promise<void>((resolve) => {
         originalImg.onload = () => {
@@ -229,16 +234,13 @@ const ObjectRemoval = () => {
         originalImg.src = history[0].imageData;
       });
 
-      // Convert canvases to blobs
       const imageBlob = dataURLtoBlob(canvas.toDataURL("image/png"));
       const maskBlob = dataURLtoBlob(maskCanvas.toDataURL("image/png"));
 
-      // Create FormData
       const formData = new FormData();
       formData.append("image", imageBlob, "image.png");
       formData.append("mask", maskBlob, "mask.png");
 
-      // Call your backend API
       const response = await fetch("http://localhost:5000/api/remove-object", {
         method: "POST",
         body: formData,
@@ -252,7 +254,6 @@ const ObjectRemoval = () => {
       const resultBlob = await response.blob();
       const resultUrl = URL.createObjectURL(resultBlob);
 
-      // Load result back to canvas
       const resultImg = new Image();
       resultImg.onload = () => {
         const ctx = canvas.getContext("2d");
@@ -260,7 +261,6 @@ const ObjectRemoval = () => {
 
         ctx.drawImage(resultImg, 0, 0, canvas.width, canvas.height);
 
-        // Clear mask
         const maskCtx = maskCanvas.getContext("2d");
         if (maskCtx) {
           maskCtx.fillStyle = "black";
@@ -318,156 +318,199 @@ const ObjectRemoval = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            AI Object Removal Tool
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Upload an image and paint over objects to remove them using Clipdrop
-            AI
-          </p>
-
-          {/* Controls */}
-          <div className="flex flex-wrap gap-4 mb-6">
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            >
-              <Upload size={20} />
-              Upload Image
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-
-            {image && (
-              <>
-                <button
-                  onClick={undo}
-                  disabled={historyIndex <= 0}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Undo size={20} />
-                  Undo
-                </button>
-
-                <button
-                  onClick={redo}
-                  disabled={historyIndex >= history.length - 1}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Redo size={20} />
-                  Redo
-                </button>
-
-                <button
-                  onClick={clearMask}
-                  className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition"
-                >
-                  <Trash2 size={20} />
-                  Clear Mask
-                </button>
-
-                <button
-                  onClick={performInpainting}
-                  disabled={isProcessing}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Eraser size={20} />
-                  {isProcessing ? "Processing..." : "Remove Objects"}
-                </button>
-
-                <button
-                  onClick={downloadImage}
-                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-                >
-                  <Download size={20} />
-                  Download
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Brush Size Control */}
-          {image && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Brush Size: {brushSize}px
-              </label>
-              <input
-                type="range"
-                min="5"
-                max="100"
-                value={brushSize}
-                onChange={(e) => setBrushSize(Number(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-              />
-            </div>
-          )}
-
-          {/* Canvas Area */}
-          <div
-            className="relative bg-gray-100 rounded-lg overflow-hidden"
-            style={{ minHeight: "400px" }}
+    <div className="w-full">
+      {/* Controls Section */}
+      <div className="mb-8">
+        <div className="flex flex-wrap gap-3 mb-6">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
           >
-            {!image ? (
-              <div className="flex items-center justify-center h-96">
-                <div className="text-center">
-                  <Upload size={48} className="mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-500">
-                    Upload an image to get started
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex justify-center items-center p-4">
-                <div className="relative">
-                  <canvas
-                    ref={canvasRef}
-                    onMouseDown={startDrawing}
-                    onMouseMove={draw}
-                    onMouseUp={stopDrawing}
-                    onMouseLeave={stopDrawing}
-                    onTouchStart={startDrawing}
-                    onTouchMove={draw}
-                    onTouchEnd={stopDrawing}
-                    className="max-w-full h-auto border-2 border-gray-300 rounded cursor-crosshair"
-                    style={{ touchAction: "none" }}
-                  />
-                </div>
-              </div>
-            )}
-            <canvas ref={maskCanvasRef} className="hidden" />
-          </div>
+            <Upload size={18} className="group-hover:animate-bounce" />
+            Upload Image
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
 
-          {/* Instructions */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-blue-900 mb-2">How to use:</h3>
-            <ol className="list-decimal list-inside space-y-1 text-blue-800 text-sm">
-              <li>Upload an image using the "Upload Image" button</li>
-              <li>Adjust the brush size using the slider</li>
-              <li>
-                Paint over the objects you want to remove (they'll appear in
-                red)
-              </li>
-              <li>Use Undo/Redo to correct mistakes</li>
-              <li>Click "Remove Objects" to process with Clipdrop AI</li>
-              <li>Download your edited image when satisfied</li>
-            </ol>
-            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
-              <p className="text-green-800 text-sm">
-                <strong>✨ AI-Powered:</strong> This tool uses Clipdrop's
-                Cleanup API which intelligently fills in removed areas with
-                realistic content based on the surrounding context.
+          {image && (
+            <>
+              <button
+                onClick={undo}
+                disabled={historyIndex <= 0}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/70 backdrop-blur-sm text-gray-700 rounded-lg font-medium border border-gray-200 hover:bg-white hover:shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none"
+              >
+                <Undo size={18} />
+                Undo
+              </button>
+
+              <button
+                onClick={redo}
+                disabled={historyIndex >= history.length - 1}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/70 backdrop-blur-sm text-gray-700 rounded-lg font-medium border border-gray-200 hover:bg-white hover:shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none"
+              >
+                <Redo size={18} />
+                Redo
+              </button>
+
+              <button
+                onClick={clearMask}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/70 backdrop-blur-sm text-gray-700 rounded-lg font-medium border border-gray-200 hover:bg-white hover:shadow-md transition-all"
+              >
+                <Trash2 size={18} />
+                Clear Mask
+              </button>
+
+              <button
+                onClick={performInpainting}
+                disabled={isProcessing}
+                className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                <Wand2
+                  size={18}
+                  className={isProcessing ? "animate-spin" : ""}
+                />
+                {isProcessing ? "Processing..." : "Remove Objects"}
+              </button>
+
+              <button
+                onClick={downloadImage}
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg hover:scale-105 transition-all"
+              >
+                <Download size={18} />
+                Download
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Brush Size Control */}
+        {image && (
+          <div className="bg-white/70 backdrop-blur-sm rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-sm font-semibold text-gray-700">
+                Brush Size
+              </label>
+              <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                {brushSize}px
+              </span>
+            </div>
+            <input
+              type="range"
+              min="5"
+              max="100"
+              value={brushSize}
+              onChange={(e) => setBrushSize(Number(e.target.value))}
+              className="w-full h-2 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full appearance-none cursor-pointer accent-blue-600"
+            />
+            <div className="flex justify-between text-xs text-gray-500 mt-2">
+              <span>Small</span>
+              <span>Large</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Canvas Area */}
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
+        {!image ? (
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Upload size={32} className="text-blue-600" />
+              </div>
+              <p className="text-gray-600 font-medium">
+                Upload an image to get started
+              </p>
+              <p className="text-gray-400 text-sm mt-1">
+                Drag and drop or click to select
               </p>
             </div>
           </div>
+        ) : (
+          <div className="flex justify-center items-center p-6">
+            <div className="relative bg-white rounded-lg shadow-lg overflow-hidden">
+              <canvas
+                ref={canvasRef}
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
+                className="max-w-full h-auto border-2 border-gray-300 rounded cursor-crosshair"
+                style={{ touchAction: "none" }}
+              />
+            </div>
+          </div>
+        )}
+        <canvas ref={maskCanvasRef} className="hidden" />
+      </div>
+
+      {/* Instructions */}
+      <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200/50 p-6 shadow-sm">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 font-bold">
+            ?
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-3">How to use:</h3>
+            <ol className="space-y-2 text-gray-700 text-sm">
+              <li className="flex gap-2">
+                <span className="font-semibold text-blue-600 min-w-max">
+                  1.
+                </span>
+                <span>Upload an image using the "Upload Image" button</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-semibold text-blue-600 min-w-max">
+                  2.
+                </span>
+                <span>Adjust the brush size using the slider</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-semibold text-blue-600 min-w-max">
+                  3.
+                </span>
+                <span>
+                  Paint over the objects you want to remove (they'll appear in
+                  red)
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-semibold text-blue-600 min-w-max">
+                  4.
+                </span>
+                <span>Use Undo/Redo to correct mistakes</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-semibold text-blue-600 min-w-max">
+                  5.
+                </span>
+                <span>Click "Remove Objects" to process with AI</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-semibold text-blue-600 min-w-max">
+                  6.
+                </span>
+                <span>Download your edited image when satisfied</span>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div className="mt-4 p-3 bg-white/60 backdrop-blur-sm border border-blue-200 rounded-lg">
+          <p className="text-gray-700 text-sm">
+            <span className="font-semibold text-blue-600">✨ AI-Powered:</span>{" "}
+            This tool uses Clipdrop's Cleanup API which intelligently fills in
+            removed areas with realistic content based on the surrounding
+            context.
+          </p>
         </div>
       </div>
     </div>

@@ -50,7 +50,7 @@ export default function AboutSection() {
     {
       name: "Briant Jasper",
       role: "Backend Developer",
-      image: "../public/images/briant.png",
+      image: "../public/images/briant.jpeg",
       bio: "Building robust and scalable backend systems",
       socials: {
         github: "https://github.com/BriantJasper",

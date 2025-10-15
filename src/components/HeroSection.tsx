@@ -177,7 +177,7 @@ export default function HeroSection() {
                 <div className="relative">
                   {/* Editor Screenshot */}
                   <img
-                    src="/images/preview-editor.png"
+                    src="/images/preview-editors.png"
                     alt="Clearity Editor Interface"
                     className="w-full h-auto rounded-xl"
                   />

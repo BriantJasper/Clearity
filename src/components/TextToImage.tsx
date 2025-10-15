@@ -5,7 +5,7 @@ import {
   RefreshCw,
   Copy,
   Loader2,
-  Image as ImageIcon,
+  XCircle,
 } from "lucide-react";
 
 interface TextToImageProps {
@@ -119,196 +119,224 @@ export default function TextToImage({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <Sparkles className="w-10 h-10 text-purple-600" />
-            <h1 className="text-5xl font-bold text-gray-800">Text to Image</h1>
+    <div className="w-full">
+      {/* Prompt Input Section */}
+      <div className="mb-8 bg-white/70 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm p-6">
+        <label className="block text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+          Describe Your Image
+        </label>
+        <textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && e.ctrlKey) {
+              handleGenerate();
+            }
+          }}
+          placeholder="A beautiful sunset over a calm ocean with dolphins jumping..."
+          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 resize-none text-gray-700 bg-white/50 transition-all"
+          rows={4}
+        />
+        <p className="text-xs text-gray-500 mt-2">
+          Press Ctrl + Enter to generate • Be specific and descriptive for best
+          results
+        </p>
+      </div>
+
+      {/* Style Modifiers */}
+      <div className="mb-8 bg-white/70 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm p-6">
+        <label className="block text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+          Add Style Modifier
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {STYLE_MODIFIERS.map((style) => (
+            <button
+              key={style}
+              onClick={() => addStyleModifier(style)}
+              className="px-3 py-1.5 bg-gradient-to-r from-violet-100 to-purple-100 text-violet-700 rounded-lg text-xs font-medium hover:from-violet-200 hover:to-purple-200 transition-all border border-violet-200/50"
+            >
+              + {style}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Example Prompts */}
+      <div className="mb-8 bg-white/70 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm p-6">
+        <label className="block text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+          Example Prompts
+        </label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {EXAMPLE_PROMPTS.map((example) => (
+            <button
+              key={example}
+              onClick={() => handleUseExample(example)}
+              className="text-left px-3 py-2.5 bg-gray-50/80 text-gray-700 rounded-lg text-xs hover:bg-gray-100 transition-all border border-gray-200 hover:border-violet-300 hover:shadow-sm"
+            >
+              {example}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-8 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/60 rounded-lg flex items-start gap-3">
+          <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Generate Button */}
+      <div className="mb-8">
+        <button
+          onClick={handleGenerate}
+          disabled={loading || !prompt.trim()}
+          className="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all flex items-center justify-center gap-2"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Generating Image...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5" />
+              Generate Image
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Generated Images Gallery */}
+      {generatedImages.length > 0 && (
+        <div className="bg-white/70 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-lg p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-violet-600" />
+            Generated Images ({generatedImages.length})
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {generatedImages.map((image, index) => (
+              <div
+                key={image.timestamp}
+                className="group relative bg-gray-100 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-200"
+              >
+                {/* Image */}
+                <div className="aspect-square bg-gray-200">
+                  <img
+                    src={image.url}
+                    alt={image.prompt}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Overlay with actions */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                  <button
+                    onClick={() => handleDownload(image.url, index)}
+                    className="bg-white/90 text-gray-800 p-2.5 rounded-full hover:bg-white transition-all shadow-md"
+                    title="Download"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setPrompt(image.prompt)}
+                    className="bg-white/90 text-gray-800 p-2.5 rounded-full hover:bg-white transition-all shadow-md"
+                    title="Regenerate"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Prompt */}
+                <div className="p-3 bg-white/50 backdrop-blur-sm">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-xs text-gray-600 line-clamp-2 flex-1">
+                      {image.prompt}
+                    </p>
+                    <button
+                      onClick={() => handleCopyPrompt(image.prompt)}
+                      className="text-gray-400 hover:text-gray-700 transition-colors flex-shrink-0"
+                      title="Copy prompt"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">
+                    {new Date(image.timestamp).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
-          <p className="text-gray-600 text-lg">
-            Transform your words into stunning AI-generated images
+        </div>
+      )}
+
+      {/* Empty State */}
+      {generatedImages.length === 0 && !loading && (
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200/50 shadow-lg p-12 text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-violet-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Sparkles className="w-8 h-8 text-violet-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+            No images generated yet
+          </h3>
+          <p className="text-gray-500 text-sm">
+            Enter a prompt above and click "Generate Image" to get started
           </p>
         </div>
+      )}
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-          {/* Prompt Input Section */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Describe Your Image
-            </label>
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && e.ctrlKey) {
-                  handleGenerate();
-                }
-              }}
-              placeholder="A beautiful sunset over a calm ocean with dolphins jumping..."
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none resize-none text-gray-700"
-              rows={4}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Press Ctrl + Enter to generate
-            </p>
+      {/* Tips Section */}
+      <div className="mt-8 bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg border border-violet-200/50 p-6 shadow-sm">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center flex-shrink-0 font-bold text-sm">
+            ?
           </div>
-
-          {/* Style Modifiers */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Add Style
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {STYLE_MODIFIERS.map((style) => (
-                <button
-                  key={style}
-                  onClick={() => addStyleModifier(style)}
-                  className="px-3 py-1.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-full text-sm hover:from-purple-200 hover:to-pink-200 transition-all"
-                >
-                  + {style}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Example Prompts */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Example Prompts
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {EXAMPLE_PROMPTS.map((example) => (
-                <button
-                  key={example}
-                  onClick={() => handleUseExample(example)}
-                  className="text-left px-3 py-2 bg-gray-50 text-gray-700 rounded-lg text-sm hover:bg-gray-100 transition-all border border-gray-200"
-                >
-                  {example}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-              {error}
-            </div>
-          )}
-
-          {/* Generate Button */}
-          <button
-            onClick={handleGenerate}
-            disabled={loading || !prompt.trim()}
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-4 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Generating Your Image...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5" />
-                Generate Image
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Generated Images Gallery */}
-        {generatedImages.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-              <ImageIcon className="w-6 h-6" />
-              Generated Images ({generatedImages.length})
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {generatedImages.map((image, index) => (
-                <div
-                  key={image.timestamp}
-                  className="group relative bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all"
-                >
-                  {/* Image */}
-                  <div className="aspect-square bg-gray-200">
-                    <img
-                      src={image.url}
-                      alt={image.prompt}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  {/* Overlay with actions */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
-                    <button
-                      onClick={() => handleDownload(image.url, index)}
-                      className="bg-white text-gray-800 p-3 rounded-full hover:bg-gray-100 transition-all"
-                      title="Download"
-                    >
-                      <Download className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => setPrompt(image.prompt)}
-                      className="bg-white text-gray-800 p-3 rounded-full hover:bg-gray-100 transition-all"
-                      title="Regenerate"
-                    >
-                      <RefreshCw className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  {/* Prompt */}
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm text-gray-600 line-clamp-2 flex-1">
-                        {image.prompt}
-                      </p>
-                      <button
-                        onClick={() => handleCopyPrompt(image.prompt)}
-                        className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-                        title="Copy prompt"
-                      >
-                        <Copy className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {new Date(image.timestamp).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {generatedImages.length === 0 && !loading && (
-          <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
-            <ImageIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">
-              No images generated yet
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-3">
+              Tips for better results:
             </h3>
-            <p className="text-gray-500">
-              Enter a prompt above and click "Generate Image" to get started
-            </p>
+            <ul className="space-y-2 text-gray-700 text-sm">
+              <li className="flex gap-2">
+                <span className="font-semibold text-violet-600 min-w-max">
+                  •
+                </span>
+                <span>Be specific and descriptive in your prompts</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-semibold text-violet-600 min-w-max">
+                  •
+                </span>
+                <span>
+                  Include details about lighting, mood, and composition
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-semibold text-violet-600 min-w-max">
+                  •
+                </span>
+                <span>
+                  Use style modifiers to achieve desired artistic effects
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-semibold text-violet-600 min-w-max">
+                  •
+                </span>
+                <span>
+                  Mention colors, textures, and atmosphere for richer results
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="font-semibold text-violet-600 min-w-max">
+                  •
+                </span>
+                <span>Experiment with different variations of your prompt</span>
+              </li>
+            </ul>
           </div>
-        )}
-
-        {/* Tips Section */}
-        <div className="mt-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
-          <h3 className="font-semibold text-gray-800 mb-3">
-            💡 Tips for Better Results:
-          </h3>
-          <ul className="text-sm text-gray-600 space-y-2">
-            <li>• Be specific and descriptive in your prompts</li>
-            <li>• Include details about lighting, mood, and composition</li>
-            <li>• Use style modifiers to achieve desired artistic effects</li>
-            <li>
-              • Mention colors, textures, and atmosphere for richer results
-            </li>
-            <li>• Experiment with different variations of your prompt</li>
-          </ul>
         </div>
       </div>
     </div>

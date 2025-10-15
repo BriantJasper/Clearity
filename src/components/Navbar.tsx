@@ -1,17 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Menu,
-  X,
-  Sparkles,
-  ChevronDown,
-  Wand2,
-  Scissors,
-  Palette,
-  Maximize2,
-  Layers,
-  Image as ImageIcon,
-} from "lucide-react";
+import { Menu, X, Sparkles, ChevronDown, Wand2, Scissors, Palette, Maximize2 } from "lucide-react";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -19,35 +8,39 @@ export default function Navbar() {
 
   const aiFeatures = [
     {
+      key: "remove-background",
       icon: <Scissors className="w-5 h-5" />,
       title: "Remove Background",
       description: "AI-powered background removal",
-      path: "/remove-bg",
+      path: "/ai?tab=remove-background",
       color: "cyan",
-      badge: "Popular",
+      badge: "Popular"
     },
     {
+      key: "style-transfer",
       icon: <Palette className="w-5 h-5" />,
       title: "Style Transfer",
       description: "Transform images with artistic styles",
-      path: "/art",
+      path: "/ai?tab=style-transfer",
       color: "purple",
-      badge: "New",
+      badge: "New"
     },
     {
+      key: "object-removal",
       icon: <Wand2 className="w-5 h-5" />,
       title: "Object Removal",
       description: "Remove unwanted objects seamlessly",
-      path: "/objectremoval",
-      color: "blue",
+      path: "/ai?tab=object-removal",
+      color: "blue"
     },
     {
+      key: "super-resolution",
       icon: <Maximize2 className="w-5 h-5" />,
       title: "Super Resolution",
       description: "Upscale images with AI enhancement",
-      path: "/super-resolution",
-      color: "pink",
-    },
+      path: "/ai?tab=super-resolution",
+      color: "pink"
+    }
   ];
 
   return (
@@ -76,28 +69,24 @@ export default function Navbar() {
             </Link>
 
             {/* AI Features Dropdown */}
-            <div
+            <div 
               className="relative"
               onMouseEnter={() => setAiMenuOpen(true)}
               onMouseLeave={() => setAiMenuOpen(false)}
             >
-              <button className="relative text-gray-700 hover:text-cyan-400 transition-colors group flex items-center gap-1">
+              <button 
+                className="relative text-gray-700 hover:text-cyan-400 transition-colors group flex items-center gap-1"
+              >
                 <Wand2 className="w-4 h-4" />
                 AI Features
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform duration-300 ${
-                    aiMenuOpen ? "rotate-180" : ""
-                  }`}
-                />
+                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${aiMenuOpen ? 'rotate-180' : ''}`} />
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-cyan-400 group-hover:w-full transition-all duration-300"></span>
               </button>
 
               {/* Dropdown Menu */}
-              <div
+              <div 
                 className={`absolute top-full left-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden transition-all duration-300 ${
-                  aiMenuOpen
-                    ? "opacity-100 translate-y-0 pointer-events-auto"
-                    : "opacity-0 -translate-y-2 pointer-events-none"
+                  aiMenuOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'
                 }`}
               >
                 {/* Dropdown Header */}
@@ -117,9 +106,7 @@ export default function Navbar() {
                       className="group flex items-start gap-4 px-6 py-4 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 transition-all"
                     >
                       {/* Icon */}
-                      <div
-                        className={`w-12 h-12 rounded-xl bg-${feature.color}-50 flex items-center justify-center text-${feature.color}-500 group-hover:scale-110 group-hover:shadow-md transition-all flex-shrink-0`}
-                      >
+                      <div className={`w-12 h-12 rounded-xl bg-${feature.color}-50 flex items-center justify-center text-${feature.color}-500 group-hover:scale-110 group-hover:shadow-md transition-all flex-shrink-0`}>
                         {feature.icon}
                       </div>
 
@@ -130,13 +117,11 @@ export default function Navbar() {
                             {feature.title}
                           </h4>
                           {feature.badge && (
-                            <span
-                              className={`text-xs px-2 py-0.5 rounded-full ${
-                                feature.badge === "Popular"
-                                  ? "bg-cyan-100 text-cyan-600"
-                                  : "bg-purple-100 text-purple-600"
-                              }`}
-                            >
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              feature.badge === 'Popular' 
+                                ? 'bg-cyan-100 text-cyan-600' 
+                                : 'bg-purple-100 text-purple-600'
+                            }`}>
                               {feature.badge}
                             </span>
                           )}
@@ -154,8 +139,8 @@ export default function Navbar() {
 
                 {/* Dropdown Footer */}
                 <div className="border-t border-gray-100 px-6 py-4 bg-gray-50">
-                  <Link
-                    to="/ai"
+                  <Link 
+                    to="/ai" 
                     className="flex items-center justify-between text-sm font-semibold text-cyan-600 hover:text-cyan-700 transition-colors"
                   >
                     <span>View all AI features</span>
@@ -164,7 +149,8 @@ export default function Navbar() {
                 </div>
               </div>
             </div>
-
+            
+            
             <Link
               to="/about"
               className="relative text-gray-700 hover:text-cyan-400 transition-colors group"
@@ -185,7 +171,8 @@ export default function Navbar() {
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </Link>
           </div>
-
+        </div>
+        <div>
           {/* Mobile Menu Button */}
           <button
             onClick={() => setOpen(!open)}
@@ -195,12 +182,12 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
-        <div
-          className={`md:hidden bg-white border-t overflow-hidden transition-all duration-300 ${
-            open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
-          }`}
-        >
+          {/* Mobile Menu */}
+          <div
+            className={`md:hidden bg-white border-t overflow-hidden transition-all duration-300 ${
+              open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
           <Link
             to="/"
             className="block px-6 py-3 hover:bg-cyan-50 hover:text-cyan-500 transition-all border-l-4 border-transparent hover:border-cyan-400"
@@ -219,17 +206,13 @@ export default function Navbar() {
                 <Wand2 className="w-4 h-4" />
                 AI Features
               </span>
-              <ChevronDown
-                className={`w-4 h-4 transition-transform ${
-                  aiMenuOpen ? "rotate-180" : ""
-                }`}
-              />
+              <ChevronDown className={`w-4 h-4 transition-transform ${aiMenuOpen ? 'rotate-180' : ''}`} />
             </button>
-
+            
             {/* Mobile AI Submenu */}
-            <div
+            <div 
               className={`bg-gray-50 overflow-hidden transition-all duration-300 ${
-                aiMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                aiMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
               }`}
             >
               {aiFeatures.map((feature, index) => (
@@ -239,16 +222,12 @@ export default function Navbar() {
                   className="flex items-center gap-3 px-10 py-3 hover:bg-cyan-50 transition-all"
                   onClick={() => setOpen(false)}
                 >
-                  <div
-                    className={`w-8 h-8 rounded-lg bg-${feature.color}-50 flex items-center justify-center text-${feature.color}-500 flex-shrink-0`}
-                  >
+                  <div className={`w-8 h-8 rounded-lg bg-${feature.color}-50 flex items-center justify-center text-${feature.color}-500 flex-shrink-0`}>
                     {feature.icon}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-900">
-                        {feature.title}
-                      </span>
+                      <span className="text-sm font-medium text-gray-900">{feature.title}</span>
                       {feature.badge && (
                         <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-600">
                           {feature.badge}
@@ -261,6 +240,13 @@ export default function Navbar() {
             </div>
           </div>
 
+          <Link
+            to="/editor"
+            className="block px-6 py-3 hover:bg-cyan-50 hover:text-cyan-500 transition-all border-l-4 border-transparent hover:border-cyan-400"
+            onClick={() => setOpen(false)}
+          >
+            Editor
+          </Link>
           <Link
             to="/about"
             className="block px-6 py-3 hover:bg-cyan-50 hover:text-cyan-500 transition-all border-l-4 border-transparent hover:border-cyan-400"

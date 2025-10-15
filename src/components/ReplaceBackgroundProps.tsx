@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, Wand2, Download, X, Loader2 } from "lucide-react";
+import { Upload, Wand2, Download, X, Loader2, XCircle } from "lucide-react";
 
 interface ReplaceBackgroundProps {
   apiUrl?: string;
@@ -56,16 +56,13 @@ export default function ReplaceBackground({
     setError(null);
 
     try {
-      // Convert base64 to blob
       const response = await fetch(originalImage);
       const blob = await response.blob();
 
-      // Create form data
       const formData = new FormData();
       formData.append("image", blob, "image.png");
       formData.append("prompt", prompt);
 
-      // Send to backend
       const result = await fetch(`${apiUrl}/api/replace-background`, {
         method: "POST",
         body: formData,
@@ -76,7 +73,6 @@ export default function ReplaceBackground({
         throw new Error(errorText || "Failed to replace background");
       }
 
-      // Convert response to base64
       const imageBlob = await result.blob();
       const imageUrl = URL.createObjectURL(imageBlob);
       setProcessedImage(imageUrl);
@@ -110,174 +106,216 @@ export default function ReplaceBackground({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            Replace Background
-          </h1>
-          <p className="text-gray-600">
-            Transform your images with AI-powered background replacement
+    <div className="w-full">
+      {/* Upload Section */}
+      {!originalImage ? (
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300 p-12 text-center cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/30 transition-all shadow-lg mb-8"
+        >
+          <div className="w-16 h-16 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Upload size={32} className="text-cyan-600" />
+          </div>
+          <p className="text-lg font-semibold text-gray-800 mb-2">
+            Upload an Image
           </p>
+          <p className="text-gray-500 text-sm">
+            Click to browse or drag and drop your image here
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
         </div>
+      ) : (
+        <>
+          {/* Controls Section */}
+          <div className="mb-8">
+            <div className="flex flex-wrap gap-3 mb-6">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
+              >
+                <Upload size={18} className="group-hover:animate-bounce" />
+                Change Image
+              </button>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
-          {/* Upload Section */}
-          {!originalImage ? (
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="border-4 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all"
-            >
-              <Upload className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <p className="text-xl font-semibold text-gray-700 mb-2">
-                Upload an Image
-              </p>
-              <p className="text-gray-500">
-                Click to browse or drag and drop your image here
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-            </div>
-          ) : (
-            <>
-              {/* Image Comparison */}
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 text-gray-700">
-                    Original Image
-                  </h3>
-                  <div className="relative rounded-lg overflow-hidden bg-gray-100 aspect-square">
-                    <img
-                      src={originalImage}
-                      alt="Original"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                </div>
+              <button
+                onClick={handleReplaceBackground}
+                disabled={loading}
+                className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 size={18} />
+                    Replace Background
+                  </>
+                )}
+              </button>
 
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 text-gray-700">
-                    New Background
-                  </h3>
-                  <div className="relative rounded-lg overflow-hidden bg-gray-100 aspect-square">
-                    {processedImage ? (
-                      <img
-                        src={processedImage}
-                        alt="Processed"
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <Wand2 className="w-16 h-16" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Prompt Input */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Background Description
-                </label>
-                <textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Describe the background you want..."
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none resize-none"
-                  rows={3}
-                />
-              </div>
-
-              {/* Preset Prompts */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Quick Presets
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {PRESET_PROMPTS.map((preset) => (
-                    <button
-                      key={preset}
-                      onClick={() => setPrompt(preset)}
-                      className={`px-3 py-1.5 rounded-full text-sm transition-all ${
-                        prompt === preset
-                          ? "bg-purple-500 text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      {preset}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                  {error}
-                </div>
+              {processedImage && (
+                <button
+                  onClick={handleDownload}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg hover:scale-105 transition-all"
+                >
+                  <Download size={18} />
+                  Download
+                </button>
               )}
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={handleReplaceBackground}
-                  disabled={loading}
-                  className="flex-1 min-w-[200px] bg-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="w-5 h-5" />
-                      Replace Background
-                    </>
-                  )}
-                </button>
+              <button
+                onClick={handleReset}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/70 backdrop-blur-sm text-gray-700 rounded-lg font-medium border border-gray-200 hover:bg-white hover:shadow-md transition-all ml-auto"
+              >
+                <X size={18} />
+                Reset
+              </button>
+            </div>
 
-                {processedImage && (
-                  <button
-                    onClick={handleDownload}
-                    className="bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-all flex items-center gap-2"
-                  >
-                    <Download className="w-5 h-5" />
-                    Download
-                  </button>
-                )}
-
-                <button
-                  onClick={handleReset}
-                  className="bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-all flex items-center gap-2"
-                >
-                  <X className="w-5 h-5" />
-                  Reset
-                </button>
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/60 rounded-lg flex items-start gap-3">
+                <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-red-700 text-sm">{error}</p>
               </div>
-            </>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* Info Section */}
-        <div className="bg-blue-50 rounded-xl p-6">
-          <h3 className="font-semibold text-gray-800 mb-2">Tips:</h3>
-          <ul className="text-sm text-gray-600 space-y-1">
-            <li>• Use clear, descriptive prompts for best results</li>
-            <li>• Images with clear subject separation work best</li>
-            <li>• Try different preset backgrounds or create your own</li>
-            <li>
-              • The AI will automatically detect and preserve your subject
-            </li>
-          </ul>
+          {/* Image Comparison */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200/50 shadow-lg overflow-hidden mb-8 p-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                  Original Image
+                </h3>
+                <div className="relative rounded-lg overflow-hidden bg-white border border-gray-200 shadow-sm aspect-square">
+                  <img
+                    src={originalImage}
+                    alt="Original"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                  New Background
+                </h3>
+                <div className="relative rounded-lg overflow-hidden bg-white border border-gray-200 shadow-sm aspect-square">
+                  {processedImage ? (
+                    <img
+                      src={processedImage}
+                      alt="Processed"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+                        <Wand2 size={24} className="text-gray-300" />
+                      </div>
+                      <p className="text-sm">Processing will appear here</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Prompt Input */}
+          <div className="mb-8 bg-white/70 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm p-5">
+            <label className="block text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+              Background Description
+            </label>
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Describe the background you want..."
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200 resize-none bg-white/50 transition-all"
+              rows={3}
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              Be descriptive for best results (e.g., "sunny beach with palm
+              trees and clear blue sky")
+            </p>
+          </div>
+
+          {/* Preset Prompts */}
+          <div className="bg-white/70 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm p-5">
+            <label className="block text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+              Quick Presets
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {PRESET_PROMPTS.map((preset) => (
+                <button
+                  key={preset}
+                  onClick={() => setPrompt(preset)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    prompt === preset
+                      ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md scale-105"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+                  }`}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Info Section */}
+      {!originalImage && (
+        <div className="mt-8 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-200/50 p-6 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-cyan-600 text-white flex items-center justify-center flex-shrink-0 font-bold">
+              ?
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-3">
+                Tips for best results:
+              </h3>
+              <ul className="space-y-2 text-gray-700 text-sm">
+                <li className="flex gap-2">
+                  <span className="font-semibold text-cyan-600 min-w-max">
+                    •
+                  </span>
+                  <span>Use clear, descriptive prompts for best results</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-semibold text-cyan-600 min-w-max">
+                    •
+                  </span>
+                  <span>Images with clear subject separation work best</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-semibold text-cyan-600 min-w-max">
+                    •
+                  </span>
+                  <span>
+                    Try different presets or create your own descriptions
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-semibold text-cyan-600 min-w-max">
+                    •
+                  </span>
+                  <span>
+                    The AI automatically detects and preserves your subject
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
