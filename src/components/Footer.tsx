@@ -44,6 +44,12 @@ export default function FooterLight() {
                   </a>
                 </li>
                 <li>
+                  <a href="/ai" className="text-gray-600 hover:text-cyan-400 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 bg-cyan-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    AI Features
+                  </a>
+                </li>
+                <li>
                   <a href="/about" className="text-gray-600 hover:text-cyan-400 transition-colors flex items-center gap-2 group">
                     <span className="w-1 h-1 bg-cyan-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     About

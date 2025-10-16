@@ -177,7 +177,7 @@ export default function HeroSection() {
                 <div className="relative">
                   {/* Editor Screenshot */}
                   <img
-                    src="/images/preview-editor.png"
+                    src="/images/preview-editors.png"
                     alt="Clearity Editor Interface"
                     className="w-full h-auto rounded-xl"
                   />
@@ -324,13 +324,13 @@ export default function HeroSection() {
                   )}
                 </div>
 
-                {/* Coming Soon Badge for AI */}
+                {/* Coming Soon Badge for AI
                 <div className="mt-6 flex justify-center">
                   <div className="inline-flex items-center gap-2 bg-purple-50 border border-purple-200 text-purple-700 px-6 py-3 rounded-full text-sm font-semibold">
                     <Wand2 className="w-4 h-4" />
                     <span>AI Features Coming Soon</span>
                   </div>
-                </div>
+                </div> */}
               </div>
             )}
 

@@ -1,50 +1,128 @@
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Wand2, Scissors, Palette, Maximize2, Sparkles, Zap, ArrowLeft, Star, Users, Shield, Download } from "lucide-react";
+import {
+  Wand2,
+  Scissors,
+  Palette,
+  Maximize2,
+  Sparkles,
+  Zap,
+  ArrowLeft,
+  Star,
+  Users,
+  Shield,
+  Download,
+  Camera,
+  Eraser,
+  Expand,
+  Image as ImageIcon,
+  Type,
+  Film,
+} from "lucide-react";
 import RemoveBackground from "../components/RemoveBackground";
 import StyleTransferRei from "../components/StyleTransferRei";
 import ObjectRemoval from "../components/ObjectRemoval";
 import SuperResolution from "../components/SuperResolution";
+import ProductPhotography from "../components/ProductPhotography";
+import ReplaceBackground from "../components/ReplaceBackgroundProps";
+import TextToImage from "../components/TextToImage";
+import VideoGeneration from "../components/VideoGeneration";
+import ImageUncrop from "../components/ImageUncrop";
+import RemoveText from "../components/RemoveText";
+import Footer from "../components/Footer";
 
-type TabKey = "remove-background" | "style-transfer" | "object-removal" | "super-resolution";
+type TabKey =
+  | "remove-background"
+  | "style-transfer"
+  | "object-removal"
+  | "super-resolution"
+  | "productphotography"
+  | "replace-background"
+  | "text-to-image"
+  | "image-uncrop"
+  | "remove-text"
+  | "video-generation";
 
-const tabs: { 
-  key: TabKey; 
-  label: string; 
-  icon: JSX.Element; 
-  color: string; 
+const tabs: {
+  key: TabKey;
+  label: string;
+  icon: JSX.Element;
+  color: string;
   gradient: string;
   badge?: string;
 }[] = [
-  { 
-    key: "remove-background", 
-    label: "Remove Background", 
-    icon: <Scissors className="w-5 h-5" />, 
+  {
+    key: "remove-background",
+    label: "Remove Background",
+    icon: <Scissors className="w-5 h-5" />,
     color: "cyan",
     gradient: "from-cyan-400 to-blue-500",
-    badge: "Popular"
+    badge: "Popular",
   },
-  { 
-    key: "style-transfer", 
-    label: "Style Transfer", 
-    icon: <Palette className="w-5 h-5" />, 
+  {
+    key: "style-transfer",
+    label: "Style Transfer",
+    icon: <Palette className="w-5 h-5" />,
     color: "purple",
     gradient: "from-purple-400 to-pink-500",
-    badge: "New"
+    badge: "New",
   },
-  { 
-    key: "object-removal", 
-    label: "Object Removal", 
-    icon: <Wand2 className="w-5 h-5" />, 
+  {
+    key: "object-removal",
+    label: "Object Removal",
+    icon: <Wand2 className="w-5 h-5" />,
     color: "blue",
-    gradient: "from-blue-400 to-indigo-500"
+    gradient: "from-blue-400 to-indigo-500",
   },
-  { 
-    key: "super-resolution", 
-    label: "Super Resolution", 
-    icon: <Maximize2 className="w-5 h-5" />, 
+  {
+    key: "super-resolution",
+    label: "Super Resolution",
+    icon: <Maximize2 className="w-5 h-5" />,
     color: "pink",
-    gradient: "from-pink-400 to-rose-500"
+    gradient: "from-pink-400 to-rose-500",
+  },
+  {
+    key: "productphotography",
+    label: "Product Photography",
+    icon: <Camera className="w-5 h-5" />,
+    color: "amber",
+    gradient: "from-amber-400 to-orange-500",
+  },
+  {
+    key: "replace-background",
+    label: "Replace Background",
+    icon: <ImageIcon className="w-5 h-5" />,
+    color: "cyan",
+    gradient: "from-cyan-400 to-sky-500",
+  },
+  {
+    key: "text-to-image",
+    label: "Text to Image",
+    icon: <Type className="w-5 h-5" />,
+    color: "violet",
+    gradient: "from-violet-400 to-purple-500",
+  },
+  {
+    key: "image-uncrop",
+    label: "Image Uncrop",
+    icon: <Expand className="w-5 h-5" />,
+    color: "emerald",
+    gradient: "from-emerald-400 to-green-500",
+  },
+  {
+    key: "remove-text",
+    label: "Remove Text",
+    icon: <Eraser className="w-5 h-5" />,
+    color: "red",
+    gradient: "from-red-400 to-rose-500",
+  },
+
+  {
+    key: "video-generation",
+    label: "Video Generation",
+    icon: <Film className="w-5 h-5" />,
+    color: "rose",
+    gradient: "from-rose-400 to-pink-500",
   },
 ];
 
@@ -62,6 +140,18 @@ export default function AIFeaturesPage() {
         return <ObjectRemoval />;
       case "super-resolution":
         return <SuperResolution />;
+      case "productphotography":
+        return <ProductPhotography />;
+      case "replace-background":
+        return <ReplaceBackground />;
+      case "text-to-image":
+        return <TextToImage />;
+      case "remove-text":
+        return <RemoveText />;
+      case "image-uncrop":
+        return <ImageUncrop />;
+      case "video-generation":
+        return <VideoGeneration />;
       default:
         return <RemoveBackground />;
     }
@@ -71,7 +161,7 @@ export default function AIFeaturesPage() {
     setSearchParams({ tab: key });
   };
 
-  const currentTab = tabs.find(t => t.key === selected);
+  const currentTab = tabs.find((t) => t.key === selected);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-cyan-50/40 relative overflow-hidden">
@@ -81,13 +171,13 @@ export default function AIFeaturesPage() {
         <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-cyan-200 to-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob"></div>
         <div className="absolute top-40 right-10 w-80 h-80 bg-gradient-to-r from-blue-200 to-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-2000"></div>
         <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-gradient-to-r from-purple-200 to-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-4000"></div>
-        
+
         {/* Floating particles */}
         <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-cyan-400 rounded-full animate-float opacity-60"></div>
         <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-blue-400 rounded-full animate-float animation-delay-1000 opacity-60"></div>
         <div className="absolute bottom-1/3 left-1/3 w-1.5 h-1.5 bg-purple-400 rounded-full animate-float animation-delay-2000 opacity-60"></div>
         <div className="absolute bottom-1/4 right-1/4 w-2 h-2 bg-pink-400 rounded-full animate-float animation-delay-3000 opacity-60"></div>
-        
+
         {/* Grid pattern overlay */}
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       </div>
@@ -96,8 +186,8 @@ export default function AIFeaturesPage() {
       <div className="relative z-10 bg-white/90 backdrop-blur-xl shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center gap-4">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="flex items-center gap-2 text-gray-600 hover:text-cyan-600 transition-colors group"
             >
               <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -116,14 +206,14 @@ export default function AIFeaturesPage() {
         {/* Hero Section */}
         <div className="text-center mb-12 animate-fade-in-up">
           <h2 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
-            Transform Your Images with{' '}
+            Transform Your Images with{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 animate-gradient">
               AI Magic
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Professional AI-powered image editing tools that work right in your browser. 
-            No downloads, no sign-ups, just powerful results.
+            Professional AI-powered image editing tools that work right in your
+            browser. No downloads, no sign-ups, just powerful results.
           </p>
         </div>
 
@@ -138,34 +228,41 @@ export default function AIFeaturesPage() {
                     key={tab.key}
                     onClick={() => handleSelect(tab.key)}
                     className={`group relative flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 animate-fade-in-up ${
-                      isActive 
-                        ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg shadow-${tab.color}-200/50 scale-105` 
+                      isActive
+                        ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg shadow-${tab.color}-200/50 scale-105`
                         : "text-gray-600 hover:bg-white/80 hover:text-gray-900 hover:shadow-md hover:scale-105"
                     }`}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                      isActive 
-                        ? "bg-white/20" 
-                        : `bg-${tab.color}-50 group-hover:bg-${tab.color}-100`
-                    }`}>
-                      <span className={isActive ? "text-white" : `text-${tab.color}-600`}>
+                    <div
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                        isActive
+                          ? "bg-white/20"
+                          : `bg-${tab.color}-50 group-hover:bg-${tab.color}-100`
+                      }`}
+                    >
+                      <span
+                        className={
+                          isActive ? "text-white" : `text-${tab.color}-600`
+                        }
+                      >
                         {tab.icon}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm">{tab.label}</span>
                       {tab.badge && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                          tab.badge === 'Popular' 
-                            ? 'bg-cyan-100 text-cyan-600' 
-                            : 'bg-purple-100 text-purple-600'
-                        }`}>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            tab.badge === "Popular"
+                              ? "bg-cyan-100 text-cyan-600"
+                              : "bg-purple-100 text-purple-600"
+                          }`}
+                        >
                           {tab.badge}
                         </span>
                       )}
                     </div>
-                    
                   </button>
                 );
               })}
@@ -178,18 +275,24 @@ export default function AIFeaturesPage() {
           <div className="mb-8 animate-fade-in-up animation-delay-200">
             <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-6">
               <div className="flex items-center justify-center gap-4">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${currentTab.gradient} flex items-center justify-center shadow-lg`}>
+                <div
+                  className={`w-12 h-12 rounded-xl bg-gradient-to-r ${currentTab.gradient} flex items-center justify-center shadow-lg`}
+                >
                   <span className="text-white">{currentTab.icon}</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">{currentTab.label}</h3>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    {currentTab.label}
+                  </h3>
                 </div>
                 {currentTab.badge && (
-                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
-                    currentTab.badge === 'Popular' 
-                      ? 'bg-cyan-100 text-cyan-700' 
-                      : 'bg-purple-100 text-purple-700'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
+                      currentTab.badge === "Popular"
+                        ? "bg-cyan-100 text-cyan-700"
+                        : "bg-purple-100 text-purple-700"
+                    }`}
+                  >
                     <Star className="w-3 h-3" />
                     {currentTab.badge}
                   </span>
@@ -201,9 +304,7 @@ export default function AIFeaturesPage() {
 
         {/* Main Content */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden animate-fade-in-up animation-delay-300">
-          <div className="p-8">
-            {CurrentPanel}
-          </div>
+          <div className="p-8">{CurrentPanel}</div>
         </div>
 
         {/* Trust Indicators */}
@@ -344,8 +445,7 @@ export default function AIFeaturesPage() {
         .shadow-blue-200 { box-shadow: 0 10px 15px -3px rgb(191 219 254 / 0.1), 0 4px 6px -2px rgb(191 219 254 / 0.05); }
         .shadow-pink-200 { box-shadow: 0 10px 15px -3px rgb(251 207 232 / 0.1), 0 4px 6px -2px rgb(251 207 232 / 0.05); }
       `}</style>
+      <Footer />
     </div>
   );
 }
-
-
