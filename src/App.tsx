@@ -3,7 +3,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import LoadingScreen from "./components/LoadingScreen";
 import { useState, useEffect } from "react";
-import "./app.css";
+import "./App.css";
 import AIFeaturesPage from "./pages/AIFeaturesPage";
 import BatchProcessor from "./components/BatchProcessor";
 import StyleTransferRei from "./components/StyleTransferRei";
@@ -25,7 +25,7 @@ function App() {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 3500);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -40,10 +40,10 @@ function App() {
         <Route path="/editor" element={<ImageEditor />} />
         <Route path="/about" element={<About />} />
         <Route path="/batch" element={<BatchProcessor />} />
-        
+
         {/* Unified AI Features Page with tabs */}
         <Route path="/ai" element={<AIFeaturesPage />} />
-        
+
         {/* Legacy routes for backward compatibility */}
         <Route path="/art" element={<StyleTransferRei />} />
         <Route path="/remove-bg" element={<RemoveBackground />} />
@@ -55,7 +55,6 @@ function App() {
         <Route path="/videogeneration" element={<VideoGeneration />} />
         <Route path="/remove-text" element={<RemoveText />} />
         <Route path="/imageuncrop" element={<ImageUncrop />} />
-
       </Routes>
     </BrowserRouter>
   );
