@@ -1,4 +1,12 @@
-import { Code, Palette, Zap, Heart, Github, Linkedin, Instagram } from "lucide-react";
+import {
+  Code,
+  Palette,
+  Zap,
+  Heart,
+  Github,
+  Linkedin,
+  Instagram,
+} from "lucide-react";
 
 interface TeamMember {
   name: string;
@@ -17,47 +25,47 @@ export default function AboutSection() {
     {
       name: "Reyner Orlando",
       role: "Leader",
-      image: "../public/images/reyner.jpg",
+      image: "/images/reyner.JPG",
       bio: "Full-stack developer with passion for creating intuitive user experiences",
       socials: {
         github: "https://github.com/reyner-orlando",
         linkedin: "https://www.linkedin.com/in/reyner-orlando/",
-        instagram: "https://www.instagram.com/reyner67/"
-      }
+        instagram: "https://www.instagram.com/reyner67/",
+      },
     },
     {
       name: "Excel Viryan",
       role: "UI/UX Designer",
-      image: "../public/images/excel.jpeg",
+      image: "/images/excel.jpeg",
       bio: "Designer focused on beautiful and functional interfaces",
       socials: {
         github: "https://github.com/Viry16",
         linkedin: "https://www.linkedin.com/in/excel-viryan-69717631b",
-        instagram: "https://www.instagram.com/excelviryan12/"
-      }
+        instagram: "https://www.instagram.com/excelviryan12/",
+      },
     },
     {
       name: "Kevin Syonin",
       role: "Frontend Engineer",
-      image: "../public/images/kevin.jpeg",
+      image: "/images/kevin.jpeg",
       bio: "React specialist building performant web applications",
       socials: {
         github: "https://github.com/HuangMingZhi0206",
         linkedin: "https://www.linkedin.com/in/kevin-syonin/",
-        instagram: "https://www.instagram.com/kevinsyonin/"
-      }
+        instagram: "https://www.instagram.com/kevinsyonin/",
+      },
     },
     {
       name: "Briant Jasper",
       role: "Backend Developer",
-      image: "../public/images/briant.jpeg",
+      image: "/images/briant.jpeg",
       bio: "Building robust and scalable backend systems",
       socials: {
         github: "https://github.com/BriantJasper",
         linkedin: "https://www.linkedin.com/in/briant-jasper-a4a0b82a9/",
-        instagram: "https://www.instagram.com/briantjasper/"
-      }
-    }
+        instagram: "https://www.instagram.com/briantjasper/",
+      },
+    },
   ];
 
   const techStack = [
@@ -84,17 +92,18 @@ export default function AboutSection() {
             <Heart className="w-4 h-4" />
             <span>About Clearity</span>
           </div>
-          
+
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
             Built with{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500">
               Modern Tech
             </span>
           </h2>
-          
+
           <p className="text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
-            Clearity is a browser-based image editor designed to make photo editing simple, 
-            fast, and accessible to everyone. No downloads, no sign-ups—just pure creativity.
+            Clearity is a browser-based image editor designed to make photo
+            editing simple, fast, and accessible to everyone. No downloads, no
+            sign-ups—just pure creativity.
           </p>
         </div>
 
@@ -106,10 +115,14 @@ export default function AboutSection() {
               className="group flex items-center gap-3 bg-white px-6 py-4 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-cyan-200 hover:-translate-y-1 cursor-pointer animate-fade-in-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+              <div
+                className={`w-12 h-12 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+              >
                 <Icon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-gray-800 font-semibold text-lg">{name}</span>
+              <span className="text-gray-800 font-semibold text-lg">
+                {name}
+              </span>
             </div>
           ))}
         </div>
@@ -122,26 +135,32 @@ export default function AboutSection() {
           <div className="grid md:grid-cols-2 gap-8 text-gray-600 leading-relaxed">
             <div className="space-y-4">
               <p>
-                <strong className="text-gray-900">Clearity</strong> was born from the idea that powerful 
-                image editing shouldn't require expensive software or complicated installations. We believe 
-                everyone should have access to professional-grade editing tools right in their browser.
+                <strong className="text-gray-900">Clearity</strong> was born
+                from the idea that powerful image editing shouldn't require
+                expensive software or complicated installations. We believe
+                everyone should have access to professional-grade editing tools
+                right in their browser.
               </p>
               <p>
-                Built with modern web technologies including <strong className="text-cyan-600">React</strong>, 
-                <strong className="text-blue-600"> TypeScript</strong>, and 
-                <strong className="text-cyan-600"> Tailwind CSS</strong>, Clearity delivers a seamless 
-                editing experience with lightning-fast performance.
+                Built with modern web technologies including{" "}
+                <strong className="text-cyan-600">React</strong>,
+                <strong className="text-blue-600"> TypeScript</strong>, and
+                <strong className="text-cyan-600"> Tailwind CSS</strong>,
+                Clearity delivers a seamless editing experience with
+                lightning-fast performance.
               </p>
             </div>
             <div className="space-y-4">
               <p>
-                Our mission is to democratize image editing by providing a free, privacy-first platform 
-                that works entirely in your browser. No data leaves your device—everything is processed 
-                locally for maximum security and speed.
+                Our mission is to democratize image editing by providing a free,
+                privacy-first platform that works entirely in your browser. No
+                data leaves your device—everything is processed locally for
+                maximum security and speed.
               </p>
               <p>
-                Whether you're a professional designer, content creator, or just someone who wants to 
-                enhance their photos, Clearity provides the tools you need with an interface you'll love.
+                Whether you're a professional designer, content creator, or just
+                someone who wants to enhance their photos, Clearity provides the
+                tools you need with an interface you'll love.
               </p>
             </div>
           </div>
@@ -176,7 +195,7 @@ export default function AboutSection() {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                
+
                 {/* Social Links - appear on hover */}
                 <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
                   {member.socials.github && (
@@ -214,8 +233,12 @@ export default function AboutSection() {
                 <h4 className="text-xl font-bold text-gray-900 group-hover:text-cyan-600 transition-colors">
                   {member.name}
                 </h4>
-                <p className="text-sm font-medium text-cyan-600">{member.role}</p>
-                <p className="text-gray-600 text-sm leading-relaxed">{member.bio}</p>
+                <p className="text-sm font-medium text-cyan-600">
+                  {member.role}
+                </p>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {member.bio}
+                </p>
               </div>
             </div>
           ))}
@@ -227,8 +250,8 @@ export default function AboutSection() {
             Ready to Start Editing?
           </h3>
           <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-            Join thousands of users who trust Clearity for their image editing needs. 
-            Start creating beautiful images today—completely free!
+            Join thousands of users who trust Clearity for their image editing
+            needs. Start creating beautiful images today—completely free!
           </p>
           <a
             href="../editor"

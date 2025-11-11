@@ -15,7 +15,7 @@ export default function FooterLight() {
             <div className="space-y-4">
               <div className="flex flex-col items-center md:items-start gap-2">
                 <img
-                  src="../public/images/logo-whitetheme.png"
+                  src="/images/logo-whitetheme.png"
                   alt="Clearity"
                   className="h-8 md:h-9 w-auto select-none pointer-events-none"
                   loading="eager"
