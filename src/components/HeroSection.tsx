@@ -1,4 +1,17 @@
-import { Sparkles, ChevronRight, Zap, Users, Download, Shield, Eye, Crop, SlidersHorizontal, Wand2, Upload, Check } from "lucide-react";
+import {
+  Sparkles,
+  ChevronRight,
+  Zap,
+  Users,
+  Download,
+  Shield,
+  Eye,
+  Crop,
+  SlidersHorizontal,
+  Wand2,
+  Upload,
+  Check,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function HeroSection() {
@@ -10,40 +23,40 @@ export default function HeroSection() {
   const [showAfter, setShowAfter] = useState(false);
 
   const featureTourSteps = [
-    { 
-      area: { top: '5%', left: '0%', width: '19%', height: '95%' },
+    {
+      area: { top: "5%", left: "0%", width: "19%", height: "95%" },
       title: "Layers Panel",
       desc: "Organize your work with layers and control opacity & blend modes",
-      icon: <Crop className="w-5 h-5" />
+      icon: <Crop className="w-5 h-5" />,
     },
-    { 
-      area: { top: '0%', left: '0%', width: '100%', height: '6%' },
+    {
+      area: { top: "0%", left: "0%", width: "100%", height: "6%" },
       title: "Top Toolbar",
       desc: "Quick access to essential tools, zoom controls, and export options",
-      icon: <SlidersHorizontal className="w-5 h-5" />
+      icon: <SlidersHorizontal className="w-5 h-5" />,
     },
-    { 
-      area: { top: '5%', left: '81.5%', width: '18.5%', height: '95%' },
+    {
+      area: { top: "5%", left: "81.5%", width: "18.5%", height: "95%" },
       title: "Tools Panel",
       desc: "Advanced editing features including crop, transform, adjust, and AI enhance",
-      icon: <Wand2 className="w-5 h-5" />
+      icon: <Wand2 className="w-5 h-5" />,
     },
-    { 
-      area: { top: '6%', left: '19%', width: '62.5%', height: '94%' },
+    {
+      area: { top: "6%", left: "19%", width: "62.5%", height: "94%" },
       title: "Canvas Workspace",
       desc: "Your creative canvas with real-time preview and non-destructive editing",
-      icon: <Eye className="w-5 h-5" />
+      icon: <Eye className="w-5 h-5" />,
     },
   ];
 
   // Auto-advance feature tour - smooth and quick
   useEffect(() => {
     if (isPaused) return;
-    
+
     const interval = setInterval(() => {
       setCurrentStep((prev) => (prev + 1) % featureTourSteps.length);
     }, 2500); // 2.5 seconds per step
-    
+
     return () => clearInterval(interval);
   }, [isPaused, featureTourSteps.length]);
 
@@ -59,13 +72,13 @@ export default function HeroSection() {
           <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-cyan-200 to-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob"></div>
           <div className="absolute top-40 right-10 w-80 h-80 bg-gradient-to-r from-blue-200 to-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-2000"></div>
           <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-gradient-to-r from-purple-200 to-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-4000"></div>
-          
+
           {/* Floating particles */}
           <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-cyan-400 rounded-full animate-float opacity-60"></div>
           <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-blue-400 rounded-full animate-float animation-delay-1000 opacity-60"></div>
           <div className="absolute bottom-1/3 left-1/3 w-1.5 h-1.5 bg-purple-400 rounded-full animate-float animation-delay-2000 opacity-60"></div>
           <div className="absolute bottom-1/4 right-1/4 w-2 h-2 bg-pink-400 rounded-full animate-float animation-delay-3000 opacity-60"></div>
-          
+
           {/* Grid pattern overlay */}
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         </div>
@@ -86,7 +99,7 @@ export default function HeroSection() {
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 leading-tight animate-fade-in-up">
               Transform Your Images
             </h1>
-            
+
             {/* Effortlessly as separate line */}
             <div className="text-4xl md:text-6xl font-bold animate-fade-in-up animation-delay-200">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 animate-gradient">
@@ -101,9 +114,16 @@ export default function HeroSection() {
               Professional editing tools at your fingertips
             </p>
             <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
-              Upload, edit, and enhance your photos with 
-              <span className="text-cyan-600 font-semibold"> AI-powered tools</span> right from your browser — 
-              <span className="text-purple-600 font-semibold"> no installation needed</span>
+              Upload, edit, and enhance your photos with
+              <span className="text-cyan-600 font-semibold">
+                {" "}
+                AI-powered tools
+              </span>{" "}
+              right from your browser —
+              <span className="text-purple-600 font-semibold">
+                {" "}
+                no installation needed
+              </span>
             </p>
           </div>
 
@@ -139,7 +159,9 @@ export default function HeroSection() {
             </div>
             <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full border border-cyan-200/50 hover:bg-white hover:shadow-md transition-all">
               <Download className="w-4 h-4 text-cyan-500" />
-              <span className="text-cyan-700 font-medium">Instant Download</span>
+              <span className="text-cyan-700 font-medium">
+                Instant Download
+              </span>
             </div>
           </div>
 
@@ -150,9 +172,9 @@ export default function HeroSection() {
               <button
                 onClick={() => setIsPaused(false)}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
-                  !isPaused 
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                  !isPaused
+                    ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
                 }`}
               >
                 <Eye className="w-5 h-5" />
@@ -161,9 +183,9 @@ export default function HeroSection() {
               <button
                 onClick={() => setIsPaused(true)}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
-                  isPaused 
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' 
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                  isPaused
+                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
                 }`}
               >
                 <Wand2 className="w-5 h-5" />
@@ -181,13 +203,13 @@ export default function HeroSection() {
                     alt="Clearity Editor Interface"
                     className="w-full h-auto rounded-xl"
                   />
-                  
-                   {/* Dark overlay with smooth cutout animation */}
-                   <div 
-                     className="absolute inset-0 pointer-events-none z-20 rounded-xl"
-                     style={{
-                       backgroundColor: 'rgba(0, 0, 0, 0.67)',
-                       clipPath: `polygon(
+
+                  {/* Dark overlay with smooth cutout animation */}
+                  <div
+                    className="absolute inset-0 pointer-events-none z-20 rounded-xl"
+                    style={{
+                      backgroundColor: "rgba(0, 0, 0, 0.67)",
+                      clipPath: `polygon(
                          0 0, 
                          0 100%, 
                          ${featureTourSteps[currentStep].area.left} 100%, 
@@ -199,19 +221,19 @@ export default function HeroSection() {
                          100% 100%, 
                          100% 0
                        )`,
-                       transition: 'clip-path 0.9s cubic-bezier(0.4, 0, 0.2, 1)'
-                     }}
+                      transition: "clip-path 0.9s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
                   />
-                  
+
                   {/* Highlighted Border Box - synchronized with overlay */}
-                  <div 
+                  <div
                     className="absolute border-4 border-cyan-400 rounded-xl shadow-2xl shadow-cyan-400/60 pointer-events-none z-30 animate-pulse-border"
                     style={{
                       top: featureTourSteps[currentStep].area.top,
                       left: featureTourSteps[currentStep].area.left,
                       width: featureTourSteps[currentStep].area.width,
                       height: featureTourSteps[currentStep].area.height,
-                      transition: 'all 0.9s cubic-bezier(0.4, 0, 0.2, 1)'
+                      transition: "all 0.9s cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
                   >
                     {/* Corner accents - larger and more visible */}
@@ -244,9 +266,9 @@ export default function HeroSection() {
                           key={idx}
                           onClick={() => setCurrentStep(idx)}
                           className={`h-2 rounded-full transition-all ${
-                            idx === currentStep 
-                              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 w-8' 
-                              : 'bg-gray-300 w-2 hover:bg-gray-400'
+                            idx === currentStep
+                              ? "bg-gradient-to-r from-cyan-500 to-blue-500 w-8"
+                              : "bg-gray-300 w-2 hover:bg-gray-400"
                           }`}
                           aria-label={`Go to step ${idx + 1}`}
                         />
@@ -266,9 +288,9 @@ export default function HeroSection() {
                     <button
                       onClick={() => setShowAfter(false)}
                       className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
-                        !showAfter 
-                          ? 'bg-gray-900 text-white shadow-lg' 
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                        !showAfter
+                          ? "bg-gray-900 text-white shadow-lg"
+                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                       }`}
                     >
                       Original
@@ -276,9 +298,9 @@ export default function HeroSection() {
                     <button
                       onClick={() => setShowAfter(true)}
                       className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
-                        showAfter 
-                          ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                        showAfter
+                          ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
+                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                       }`}
                     >
                       <Sparkles className="w-4 h-4" />
@@ -287,9 +309,11 @@ export default function HeroSection() {
                   </div>
 
                   {/* Before Image */}
-                  <div className={`absolute inset-0 transition-opacity duration-700 ${
-                    showAfter ? 'opacity-0' : 'opacity-100'
-                  }`}>
+                  <div
+                    className={`absolute inset-0 transition-opacity duration-700 ${
+                      showAfter ? "opacity-0" : "opacity-100"
+                    }`}
+                  >
                     <img
                       src="/images/preview-editor.png"
                       alt="Original Editor"
@@ -301,9 +325,11 @@ export default function HeroSection() {
                   </div>
 
                   {/* After Image */}
-                  <div className={`absolute inset-0 transition-opacity duration-700 ${
-                    showAfter ? 'opacity-100' : 'opacity-0'
-                  }`}>
+                  <div
+                    className={`absolute inset-0 transition-opacity duration-700 ${
+                      showAfter ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
                     <img
                       src="/images/preview-editor-ai.png"
                       alt="AI Enhanced Editor"
@@ -324,13 +350,13 @@ export default function HeroSection() {
                   )}
                 </div>
 
-                {/* Coming Soon Badge for AI */}
+                {/* Coming Soon Badge for AI
                 <div className="mt-6 flex justify-center">
                   <div className="inline-flex items-center gap-2 bg-purple-50 border border-purple-200 text-purple-700 px-6 py-3 rounded-full text-sm font-semibold">
                     <Wand2 className="w-4 h-4" />
                     <span>AI Features Coming Soon</span>
                   </div>
-                </div>
+                </div> */}
               </div>
             )}
 
@@ -342,7 +368,10 @@ export default function HeroSection() {
       </section>
 
       {/* Font Import */}
-      <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@600;700&display=swap" rel="stylesheet" />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@600;700&display=swap"
+        rel="stylesheet"
+      />
 
       <style>{`
         @keyframes blob {

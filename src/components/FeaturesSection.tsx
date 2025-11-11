@@ -5,15 +5,22 @@ import {
   SlidersHorizontal,
   Contrast,
   Sun,
-  Wand2,
   Sparkles,
-  ScanFace,
-  Eraser,
   MoveUpRight,
   Layers,
   Paintbrush,
   Zap,
   Eye,
+  Scissors,
+  Palette,
+  Wand2,
+  Maximize2,
+  Camera,
+  Image as ImageIcon,
+  Type,
+  Expand,
+  Eraser,
+  Film,
 } from "lucide-react";
 
 import { Link } from "react-router-dom";
@@ -106,42 +113,121 @@ export default function FeaturesSection() {
           </div>
         </div>
 
-        {/* AI Features */}
+        {/* AI Features - UPDATED ICONS */}
         <div className="mb-16">
           <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
             AI-Powered Features
           </h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[
               {
-                icon: Eraser,
-                label: "Background Removal",
+                icon: Scissors,
+                label: "Remove Background",
                 description: "Remove backgrounds instantly with AI",
                 color: "from-cyan-400 to-blue-500",
+                badge: "Popular",
               },
               {
-                icon: Sparkles,
-                label: "Super-Resolution",
-                description: "Enhance image quality with AI upscaling",
+                icon: Palette,
+                label: "Style Transfer",
+                description: "Transform images with artistic styles",
                 color: "from-purple-400 to-pink-500",
-              },
-              {
-                icon: ScanFace,
-                label: "Face Enhancement",
-                description: "Automatically enhance facial features",
-                color: "from-green-400 to-emerald-500",
+                badge: "New",
               },
               {
                 icon: Wand2,
-                label: "Smart Filters",
-                description: "AI-powered automatic adjustments",
-                color: "from-orange-400 to-red-500",
+                label: "Object Removal",
+                description: "Remove unwanted objects seamlessly",
+                color: "from-blue-400 to-indigo-500",
+              },
+              {
+                icon: Maximize2,
+                label: "Super Resolution",
+                description: "Enhance image quality with AI upscaling",
+                color: "from-pink-400 to-rose-500",
+              },
+              {
+                icon: Camera,
+                label: "Product Photography",
+                description: "Professional product shots with AI",
+                color: "from-amber-400 to-orange-500",
+              },
+              {
+                icon: ImageIcon,
+                label: "Replace Background",
+                description: "Change backgrounds with AI precision",
+                color: "from-cyan-400 to-sky-500",
+              },
+              {
+                icon: Type,
+                label: "Text to Image",
+                description: "Generate images from text descriptions",
+                color: "from-violet-400 to-purple-500",
+              },
+              {
+                icon: Expand,
+                label: "Image Uncrop",
+                description: "Extend images beyond original boundaries",
+                color: "from-emerald-400 to-green-500",
+              },
+            ].map(
+              ({ icon: IconComp, label, description, color, badge }, index) => (
+                <div
+                  key={label}
+                  className="group p-6 rounded-2xl border border-gray-200/50 bg-white/70 backdrop-blur-sm hover:bg-white hover:shadow-xl hover:-translate-y-2 hover:border-cyan-300 transition-all duration-300 cursor-pointer animate-fade-in-up relative"
+                  style={{ animationDelay: `${0.6 + index * 0.1}s` }}
+                >
+                  {badge && (
+                    <div
+                      className={`absolute -top-2 -right-2 px-2 py-1 rounded-full text-xs font-semibold ${
+                        badge === "Popular"
+                          ? "bg-gradient-to-r from-orange-400 to-red-500 text-white"
+                          : "bg-gradient-to-r from-green-400 to-emerald-500 text-white"
+                      }`}
+                    >
+                      {badge}
+                    </div>
+                  )}
+                  <div className="flex items-start gap-4">
+                    <div
+                      className={`w-12 h-12 rounded-xl bg-gradient-to-r ${color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}
+                    >
+                      <IconComp className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-gray-900 font-semibold mb-2 group-hover:text-gray-700 transition-colors">
+                        {label}
+                      </h4>
+                      <p className="text-gray-600 text-sm leading-relaxed">
+                        {description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+
+          {/* Last Row - Centered for 2 items */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-3xl mx-auto mt-6">
+            {[
+              {
+                icon: Eraser,
+                label: "Remove Text",
+                description: "Remove text overlays from images",
+                color: "from-red-400 to-rose-500",
+              },
+              {
+                icon: Film,
+                label: "Video Generation",
+                description: "Create videos from images and prompts",
+                color: "from-rose-400 to-pink-500",
               },
             ].map(({ icon: IconComp, label, description, color }, index) => (
               <div
                 key={label}
-                className="group p-6 rounded-2xl border border-gray-200/50 bg-white/70 backdrop-blur-sm hover:bg-white hover:shadow-xl hover:-translate-y-2 hover:border-cyan-300 transition-all duration-300 cursor-pointer animate-fade-in-up"
-                style={{ animationDelay: `${0.6 + index * 0.1}s` }}
+                className="group p-6 rounded-2xl border border-gray-200/50 bg-white/70 backdrop-blur-sm hover:bg-white hover:shadow-xl hover:-translate-y-2 hover:border-cyan-300 transition-all duration-300 cursor-pointer animate-fade-in-up relative"
+                style={{ animationDelay: `${1.4 + index * 0.1}s` }}
               >
                 <div className="flex items-start gap-4">
                   <div

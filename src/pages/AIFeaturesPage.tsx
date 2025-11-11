@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   Wand2,
@@ -6,7 +6,6 @@ import {
   Palette,
   Maximize2,
   Sparkles,
-  Zap,
   ArrowLeft,
   Star,
   Users,
@@ -45,7 +44,7 @@ type TabKey =
 const tabs: {
   key: TabKey;
   label: string;
-  icon: JSX.Element;
+  icon: React.ReactNode;
   color: string;
   gradient: string;
   badge?: string;

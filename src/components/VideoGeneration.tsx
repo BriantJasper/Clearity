@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Video,
   Download,
@@ -10,7 +10,7 @@ import {
   XCircle,
 } from "lucide-react";
 
-const EXAMPLE_PROMPTS = [
+const EXAMPLE_PROMPTS: string[] = [
   "A serene time-lapse of clouds moving over a mountain range at sunset",
   "A cute puppy playing with a ball in a sunny garden",
   "Ocean waves crashing against rocky cliffs in slow motion",
@@ -23,13 +23,15 @@ const EXAMPLE_PROMPTS = [
   "A waterfall cascading into a crystal clear pool surrounded by tropical plants",
 ];
 
-const ASPECT_RATIOS = [
+type AspectRatioOption = { value: string; label: string; icon: string };
+
+const ASPECT_RATIOS: AspectRatioOption[] = [
   { value: "16:9", label: "16:9 (Landscape)", icon: "🖥️" },
   { value: "9:16", label: "9:16 (Portrait)", icon: "📱" },
   { value: "1:1", label: "1:1 (Square)", icon: "⬜" },
 ];
 
-const STYLE_SUGGESTIONS = [
+const STYLE_SUGGESTIONS: string[] = [
   "cinematic",
   "slow motion",
   "time-lapse",
@@ -42,14 +44,24 @@ const STYLE_SUGGESTIONS = [
   "vibrant colors",
 ];
 
-const VideoGeneration = ({ apiUrl = "http://localhost:5000" }) => {
-  const [prompt, setPrompt] = useState("");
-  const [aspectRatio, setAspectRatio] = useState("16:9");
-  const [generatedVideos, setGeneratedVideos] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [playingVideo, setPlayingVideo] = useState(null);
-  const [estimatedTime, setEstimatedTime] = useState(0);
+type GeneratedVideo = {
+  url: string;
+  prompt: string;
+  aspectRatio: string;
+  timestamp: number;
+  duration?: number;
+};
+
+const VideoGeneration: React.FC<{ apiUrl?: string }> = ({
+  apiUrl = "http://localhost:5000",
+}) => {
+  const [prompt, setPrompt] = useState<string>("");
+  const [aspectRatio, setAspectRatio] = useState<string>("16:9");
+  const [generatedVideos, setGeneratedVideos] = useState<GeneratedVideo[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<number | null>(null);
+  const [estimatedTime, setEstimatedTime] = useState<number>(0);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -110,7 +122,7 @@ const VideoGeneration = ({ apiUrl = "http://localhost:5000" }) => {
     }
   };
 
-  const handleDownload = (videoUrl, index) => {
+  const handleDownload = (videoUrl: string, index: number) => {
     const link = document.createElement("a");
     link.href = videoUrl;
     link.download = `generated-video-${index + 1}.mp4`;
@@ -119,8 +131,10 @@ const VideoGeneration = ({ apiUrl = "http://localhost:5000" }) => {
     document.body.removeChild(link);
   };
 
-  const togglePlay = (index) => {
-    const video = document.getElementById(`video-${index}`);
+  const togglePlay = (index: number) => {
+    const video = document.getElementById(
+      `video-${index}`
+    ) as HTMLVideoElement | null;
     if (video) {
       if (playingVideo === index) {
         video.pause();
@@ -132,7 +146,7 @@ const VideoGeneration = ({ apiUrl = "http://localhost:5000" }) => {
     }
   };
 
-  const addStyleSuggestion = (style) => {
+  const addStyleSuggestion = (style: string) => {
     if (prompt.trim()) {
       setPrompt(`${prompt}, ${style}`);
     } else {
@@ -140,7 +154,7 @@ const VideoGeneration = ({ apiUrl = "http://localhost:5000" }) => {
     }
   };
 
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
